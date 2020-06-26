@@ -1,0 +1,77 @@
+# StackRox inline orb sample
+# author neil@stackrox.com
+
+version: 2.1
+orbs:
+  rox-orb:
+    jobs:
+      rox-deployment-check:
+        machine: true
+        parameters:
+          rox_api_token:
+            description: API key with CI permissions
+            type: string
+          rox_central_endpoint:
+            description: URL of Central (central.contoso.com:443 for example)
+            type: string
+          rox_deployment:
+            description: Path/name of yaml to check
+            type: string
+        steps:
+          - checkout
+          - rox-roxctl-install:
+              rox_api_token: <<parameters.rox_api_token>>
+              rox_central_endpoint: <<parameters.rox_central_endpoint>>
+          - run: >-
+              ./roxctl deployment check -e <<parameters.rox_central_endpoint>> --file <<parameters.rox_deployment>>
+      rox-image-scan:
+        machine: true
+        parameters:
+          rox_api_token:
+            description: API key with CI permissions
+            type: string
+          rox_central_endpoint:
+            description: URL of Central (central.contoso.com:443 for example)
+            type: string
+          rox_image_scan:
+            description: Name of image to scan (neilcar/testimage:5 or registry.contoso.com/db_broker:latest for example)
+            type: string
+        steps:
+          - rox-roxctl-install:
+              rox_api_token: <<parameters.rox_api_token>>
+              rox_central_endpoint: <<parameters.rox_central_endpoint>>
+          - run: >-
+              ./roxctl image scan -e <<parameters.rox_central_endpoint>> --image <<parameters.rox_image_scan>>
+          - run: >-
+              ./roxctl image check -e <<parameters.rox_central_endpoint>> --image <<parameters.rox_image_scan>>
+    commands:
+      rox-roxctl-install:
+        parameters:
+          rox_api_token:
+            description: API key with CI permissions
+            type: string
+          rox_central_endpoint:
+            description: URL of Central (central.contoso.com:443 for example)
+            type: string    
+        steps:
+          - run: >-
+              curl -k -L -H "Authorization: Bearer <<parameters.rox_api_token>>" https://<<parameters.rox_central_endpoint>>/api/cli/download/roxctl-linux --output ./roxctl
+          - run: chmod +x ./roxctl
+    
+workflows:
+  scanimage:
+    when: always
+    jobs:
+      - rox-orb/rox-image-scan: 
+          context: rox
+          name: scan an image
+          rox_central_endpoint: $ROX_CENTRAL_ENDPOINT
+          rox_api_token: $ROX_API_TOKEN
+          rox_image_scan: neilcar/jenkins-demo:latest
+      - rox-orb/rox-deployment-check: 
+          context: rox
+          name: Check deployment
+          rox_central_endpoint: $ROX_CENTRAL_ENDPOINT
+          rox_api_token: $ROX_API_TOKEN
+          rox_deployment: deploy.yml
+
