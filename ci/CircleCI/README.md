@@ -1,6 +1,6 @@
 ﻿# CircleCI Orb Sample 
  
- This is a not-yet-customer-ready sample of a CircleCI orb to encapsulate scanning with roxctl.
+ OWNER:  neil@stackrox.com
  
  This sample uses an inline orb that exposes two jobs 
  
