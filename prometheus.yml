@@ -1,0 +1,1114 @@
+# clemenko
+# https://github.com/poseidon/typhoon/tree/master/addons
+# https://github.com/vegasbrianc/prometheus
+# https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md
+# https://github.com/discordianfish/prometheus/blob/76a86519afe94f651cbb27f2a0eb564c2fad5536/documentation/examples/prometheus-kubernetes.yml#L205 
+#
+# https://github.com/docker/orca/blob/e71747caf8d4cd32a42cdfd53540e4640114eb19/project/metrics/using_external_prometheus.md
+# https://github.com/docker/orca/blob/e71747caf8d4cd32a42cdfd53540e4640114eb19/project/metrics/metrics_descriptions.md
+#
+#
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - nodes/proxy
+  - nodes/metrics
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+- nonResourceURLs: ["/metrics"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+subjects:
+- kind: ServiceAccount
+  name: prometheus
+  namespace: monitoring
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: monitoring
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: node-exporter
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+      name: node-exporter
+      annotations:
+        prometheus.io.scrape: 'true'
+        prometheus.io/port: '9100'
+    spec:
+      serviceAccountName: prometheus
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+      containers:
+      - name: node-exporter
+        image: prom/node-exporter
+        securityContext:
+          privileged: true
+        resources:
+          requests:
+            memory: 30Mi
+            cpu: 100m
+          limits:
+            memory: 50Mi
+            cpu: 200m
+        ports:
+        - containerPort: 9100
+          hostPort: 9100
+          name: scrape
+        volumeMounts:
+        - name: data-disk
+          mountPath: /data-disk
+          readOnly: true
+        - name: root-disk
+          mountPath: /root-disk
+          readOnly: true
+      volumes:
+        - name: data-disk
+          hostPath:
+            path: /localdata
+        - name: root-disk
+          hostPath:
+            path: /
+      hostNetwork: true
+      hostPID: true
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cadvisor
+  namespace: monitoring
+  labels:
+    app: cadvisor
+spec:
+  selector:
+    matchLabels:
+      app: cadvisor
+  template:
+    metadata:
+      labels:
+        app: cadvisor
+      annotations:
+        prometheus.io.scrape: 'true'
+        prometheus.io/port: '4194'
+    spec:
+      containers:
+      - name: cadvisor
+        image: google/cadvisor
+        volumeMounts:
+        - name: rootfs
+          mountPath: /rootfs
+          readOnly: true
+        - name: var-run
+          mountPath: /var/run
+          readOnly: false
+        - name: sys
+          mountPath: /sys
+          readOnly: true
+        - name: docker
+          mountPath: /var/lib/docker
+          readOnly: true
+        ports:
+          - name: http
+            containerPort: 8080
+            hostPort: 4194
+            protocol: TCP
+        args:
+          - --housekeeping_interval=10s
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: rootfs
+        hostPath:
+          path: /
+      - name: var-run
+        hostPath:
+          path: /var/run
+      - name: sys
+        hostPath:
+          path: /sys
+      - name: docker
+        hostPath:
+          path: /var/lib/docker
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/path: '/metrics'
+  labels:
+    name: alertmanager
+  name: alertmanager
+  namespace: monitoring
+spec:
+  selector:
+    app: alertmanager
+  type: NodePort
+  ports:
+  - name: alertmanager
+    protocol: TCP
+    port: 9093
+    targetPort: 9093
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: alertmanager-config
+  namespace: monitoring
+data:
+  config.yml: |
+    global:
+      # ResolveTimeout is the time after which an alert is declared resolved
+      # if it has not been updated.
+      resolve_timeout: 5m
+
+      # The smarthost and SMTP sender used for mail notifications.
+      smtp_smarthost: 'smtp.gmail.com:587'
+      smtp_from: 'foo@bar.com'
+      smtp_auth_username: 'foo@bar.com'
+      smtp_auth_password: 'barfoo'
+
+      # The API URL to use for Slack notifications.
+      slack_api_url: 'https://hooks.slack.com/services/abc123'
+
+      # # The auth token for Hipchat.
+      # hipchat_auth_token: '1234556789'
+      #
+      # # Alternative host for Hipchat.
+      # hipchat_url: 'https://hipchat.foobar.org/'
+
+    # # The directory from which notification templates are read.
+    templates:
+    - '/etc/alertmanager-templates/*.tmpl'
+
+    # The root route on which each incoming alert enters.
+    route:
+
+      # The labels by which incoming alerts are grouped together. For example,
+      # multiple alerts coming in for cluster=A and alertname=LatencyHigh would
+      # be batched into a single group.
+
+      group_by: ['alertname', 'cluster', 'service']
+
+      # When a new group of alerts is created by an incoming alert, wait at
+      # least 'group_wait' to send the initial notification.
+      # This way ensures that you get multiple alerts for the same group that start
+      # firing shortly after another are batched together on the first
+      # notification.
+
+      group_wait: 30s
+
+      # When the first notification was sent, wait 'group_interval' to send a batch
+      # of new alerts that started firing for that group.
+
+      group_interval: 5m
+
+      # If an alert has successfully been sent, wait 'repeat_interval' to
+      # resend them.
+
+      #repeat_interval: 1m
+      repeat_interval: 15m
+
+      # A default receiver
+
+      # If an alert isn't caught by a route, send it to default.
+      receiver: default
+
+      # All the above attributes are inherited by all child routes and can
+      # overwritten on each.
+
+      # The child route trees.
+      routes:
+      # Send severity=slack alerts to slack.
+      - match:
+          severity: slack
+        receiver: slack_alert
+      - match:
+          severity: email
+        receiver: slack_alert
+    #   receiver: email_alert
+
+    receivers:
+    - name: 'default'
+      slack_configs:
+      - channel: '#devops'
+        text: '<!channel>{{ template "slack.devops.text" . }}'
+        send_resolved: true
+
+    - name: 'slack_alert'
+      slack_configs:
+      - channel: '#devops'
+        send_resolved: true
+
+        # # Whether or not to notify about resolved alerts.
+        # send_resolved: true
+        #
+        # # The Slack webhook URL.
+        # [ api_url: <string> | default = global.slack_api_url ]
+        #
+        # # The channel or user to send notifications to.
+        # channel: <tmpl_string>
+        #
+        # # API request data as defined by the Slack webhook API.
+        # [ color: <tmpl_string> | default = '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}' ]
+        # [ username: <tmpl_string> | default = '{{ template "slack.default.username" . }}'
+        # [ title: <tmpl_string> | default = '{{ template "slack.default.title" . }}' ]
+        # [ title_link: <tmpl_string> | default = '{{ template "slack.default.titlelink" . }}' ]
+        # [ icon_emoji: <tmpl_string> ]
+        # [ pretext: <tmpl_string> | default = '{{ template "slack.default.pretext" . }}' ]
+        # [ text: <tmpl_string> | default = '{{ template "slack.default.text" . }}' ]
+        # [ fallback: <tmpl_string> | default = '{{ template "slack.default.fallback" . }}' ]
+
+    - name: 'email_alert'
+      email_configs:
+      - to: 'foo@bar.com'
+
+
+    #
+    #
+    #
+    # global:
+    #   # The smarthost and SMTP sender used for mail notifications.
+    #   smtp_smarthost: 'localhost:25'
+    #   smtp_from: 'alertmanager@example.org'
+    #   smtp_auth_username: 'alertmanager'
+    #   smtp_auth_password: 'password'
+    #   # The auth token for Hipchat.
+    #   hipchat_auth_token: '1234556789'
+    #   # Alternative host for Hipchat.
+    #   hipchat_url: 'https://hipchat.foobar.org/'
+    #
+    # # The directory from which notification templates are read.
+    # templates:
+    # - '/etc/alertmanager/template/*.tmpl'
+    #
+    # # The root route on which each incoming alert enters.
+    # route:
+    #   # The labels by which incoming alerts are grouped together. For example,
+    #   # multiple alerts coming in for cluster=A and alertname=LatencyHigh would
+    #   # be batched into a single group.
+    #   group_by: ['alertname', 'cluster', 'service']
+    #
+    #   # When a new group of alerts is created by an incoming alert, wait at
+    #   # least 'group_wait' to send the initial notification.
+    #   # This way ensures that you get multiple alerts for the same group that start
+    #   # firing shortly after another are batched together on the first
+    #   # notification.
+    #   group_wait: 30s
+    #
+    #   # When the first notification was sent, wait 'group_interval' to send a batch
+    #   # of new alerts that started firing for that group.
+    #   group_interval: 5m
+    #
+    #   # If an alert has successfully been sent, wait 'repeat_interval' to
+    #   # resend them.
+    #   repeat_interval: 3h
+    #
+    #   # A default receiver
+    #   receiver: team-X-mails
+    #
+    #   # All the above attributes are inherited by all child routes and can
+    #   # overwritten on each.
+    #
+    #   # The child route trees.
+    #   routes:
+    #   # This routes performs a regular expression match on alert labels to
+    #   # catch alerts that are related to a list of services.
+    #   - match_re:
+    #       service: ^(foo1|foo2|baz)$
+    #     receiver: team-X-mails
+    #     # The service has a sub-route for critical alerts, any alerts
+    #     # that do not match, i.e. severity != critical, fall-back to the
+    #     # parent node and are sent to 'team-X-mails'
+    #     routes:
+    #     - match:
+    #         severity: critical
+    #       receiver: team-X-pager
+    #   - match:
+    #       service: files
+    #     receiver: team-Y-mails
+    #
+    #     routes:
+    #     - match:
+    #         severity: critical
+    #       receiver: team-Y-pager
+    #
+    #   # This route handles all alerts coming from a database service. If there's
+    #   # no team to handle it, it defaults to the DB team.
+    #   - match:
+    #       service: database
+    #     receiver: team-DB-pager
+    #     # Also group alerts by affected database.
+    #     group_by: [alertname, cluster, database]
+    #     routes:
+    #     - match:
+    #         owner: team-X
+    #       receiver: team-X-pager
+    #     - match:
+    #         owner: team-Y
+    #       receiver: team-Y-pager
+    #
+    #
+    # # Inhibition rules allow to mute a set of alerts given that another alert is
+    # # firing.
+    # # We use this to mute any warning-level notifications if the same alert is
+    # # already critical.
+    # inhibit_rules:
+    # - source_match:
+    #     severity: 'critical'
+    #   target_match:
+    #     severity: 'warning'
+    #   # Apply inhibition if the alertname is the same.
+    #   equal: ['alertname', 'cluster', 'service']
+    #
+    #
+    # receivers:
+    # - name: 'team-X-mails'
+    #   email_configs:
+    #   - to: 'team-X+alerts@example.org'
+    #
+    # - name: 'team-X-pager'
+    #   email_configs:
+    #   - to: 'team-X+alerts-critical@example.org'
+    #   pagerduty_configs:
+    #   - service_key: <team-X-key>
+    #
+    # - name: 'team-Y-mails'
+    #   email_configs:
+    #   - to: 'team-Y+alerts@example.org'
+    #
+    # - name: 'team-Y-pager'
+    #   pagerduty_configs:
+    #   - service_key: <team-Y-key>
+    #
+    # - name: 'team-DB-pager'
+    #   pagerduty_configs:
+    #   - service_key: <team-DB-key>
+    # - name: 'team-X-hipchat'
+    #   hipchat_configs:
+    #   - auth_token: <auth_token>
+    #     room_id: 85
+    #     message_format: html
+    #     notify: true
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: alertmanager-templates
+  namespace: monitoring
+data:
+  empty.txt: |
+    # empty fileZZ
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager
+  template:
+    metadata:
+      name: alertmanager
+      labels:
+        app: alertmanager
+    spec:
+      containers:
+      - name: alertmanager
+        image: prom/alertmanager:latest
+        args:
+          - '--config.file=/etc/alertmanager/config.yml'
+          - '--storage.path=/alertmanager'
+        ports:
+        - name: alertmanager
+          containerPort: 9093
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/alertmanager
+        - name: templates-volume
+          mountPath: /etc/alertmanager-templates
+        - name: alertmanager
+          mountPath: /alertmanager
+      volumes:
+      - name: config-volume
+        configMap:
+          name: alertmanager-config
+      - name: templates-volume
+        configMap:
+          name: alertmanager-templates
+      - name: alertmanager
+        emptyDir: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-configmap
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+    alerting:
+      alertmanagers:
+      - scheme: http
+        static_configs:
+        - targets:
+          - "alertmanager:9093"
+    scrape_configs:
+    - job_name: 'kube-state-metrics'
+      static_configs:
+        - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
+
+    - job_name: 'prometheus'
+      static_configs:
+        - targets: ['localhost:9090']
+
+    - job_name: 'kubernetes-apiservers'
+      kubernetes_sd_configs:
+      - role: endpoints
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        insecure_skip_verify: true
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+        action: keep
+        regex: default;kubernetes;https
+
+    - job_name: 'kubernetes-nodes'
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        insecure_skip_verify: true
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics
+
+    - job_name: 'cadvisor'
+      scheme: http
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - source_labels: [ __meta_kubernetes_node_address_InternalIP ]
+        regex:  '(.*)'
+        target_label: __address__
+        replacement: '${1}:4194'
+
+    - job_name: 'node-exporter'
+      scheme: http
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - source_labels: [ __meta_kubernetes_node_address_InternalIP ]
+        regex:  '(.*)'
+        target_label: __address__
+        replacement: '${1}:9100'
+      - source_labels: [__meta_kubernetes_pod_node_name]
+        target_label: node  
+
+    - job_name: 'kubernetes-service-endpoints'
+      scheme: http
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        insecure_skip_verify: true
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      kubernetes_sd_configs:
+        - role: endpoints
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+          action: keep
+          regex: true
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+          action: replace
+          target_label: __scheme__
+          regex: (https?)
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+          action: replace
+          target_label: __address__
+          regex: (.+)(?::\d+);(\d+)
+          replacement: $1:$2
+        - action: labelmap
+          regex: __meta_kubernetes_service_label_(.+)
+        - source_labels: [__meta_kubernetes_namespace]
+          action: replace
+          target_label: kubernetes_namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          action: replace
+          target_label: kubernetes_name
+
+    - job_name: 'ingress-nginx-endpoints'
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+          - ingress-nginx
+
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+        action: replace
+        target_label: __scheme__
+        regex: (https?)
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        target_label: __address__
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+
+      - source_labels: [__meta_kubernetes_service_name]
+        regex: prometheus-server
+        action: drop
+        
+    - job_name: 'kubernetes-ingress'
+      metrics_path: /probe
+      params:
+        module: [http_2xx]
+      kubernetes_sd_configs:
+      - role: ingress
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_ingress_scheme,__address__,__meta_kubernetes_ingress_path]
+        regex: (.+);(.+);(.+)
+        replacement: ${1}://${2}${3}
+        target_label: __param_target
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+      - source_labels: [__param_target]
+        target_label: instance
+      - action: labelmap
+        regex: __meta_kubernetes_ingress_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_ingress_name]
+        target_label: kubernetes_name
+
+    - job_name: blackbox-exporter
+      metrics_path: /probe
+      params:
+        module: [http_2xx]
+      static_configs:
+        - targets:
+          - http://www.example.com   
+      relabel_configs:
+        - source_labels: [__address__]
+          target_label: __param_target
+        - source_labels: [__param_target]
+          target_label: instance
+        - target_label: __address__
+          replacement: blackbox-exporter:9115
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: 'true'
+  labels:
+    name: prometheus-svc 
+    kubernetes.io/name: "Prometheus"
+  name: prometheus-svc
+  namespace: monitoring
+spec:
+  selector:
+    app: prometheus
+  type: NodePort
+  ports:
+  - name: prometheus
+    protocol: TCP
+    port: 9090
+    targetPort: 9090
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-deployment
+  namespace: monitoring
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      name: prometheus
+      labels:
+        app: prometheus
+      annotations:
+        prometheus.io.scrape: 'true'
+        prometheus.io/port: '9090'
+    spec:
+      serviceAccountName: prometheus
+      containers:
+      - name: prometheus
+        image: prom/prometheus 
+        args:
+          - '--storage.tsdb.retention=360h'
+          - '--config.file=/etc/prometheus/prometheus.yml'
+        ports:
+        - name: web
+          containerPort: 9090
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/prometheus/prometheus.yml
+          subPath: prometheus.yml
+#        - name: rules-volume
+#          mountPath: /etc/prometheus-rules
+        - name: prometheus-data
+          mountPath: /prometheus
+      volumes:
+      - name: config-volume
+        configMap:
+          name: prometheus-configmap
+#      - name: rules-volume
+#        configMap:
+#          name: prometheus-rules
+      - name: prometheus-data
+        emptyDir: {}
+#        persistentVolumeClaim:       
+#          claimName: prometheus-nfs
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasource
+  namespace: monitoring
+  labels:
+      grafana_datasource: "true"
+data:
+  datasource.yml: |-
+     apiVersion: 1
+     datasources:
+     - name: prometheus
+       type: prometheus
+       access: proxy
+       orgId: 1
+       url: http://prometheus-svc.monitoring.svc.cluster.local:9090
+       isDefault: true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-providers
+  namespace: monitoring
+  labels:
+      grafana_dashboard: "true"
+data:
+  datasource.yml: |-
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 10 #how often Grafana will scan for changed dashboards
+        options:
+          path: /var/lib/grafana/dashboards/
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+    component: core
+  annotations:
+    prometheus.io/scrape: 'true'
+spec:
+  selector:
+    app: grafana
+    component: core
+  type: NodePort
+  ports:
+  - name: grafana
+    protocol: TCP
+    port: 3000
+    targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+    component: core
+spec:
+  selector:
+    matchLabels:
+      app: grafana
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: grafana
+        component: core
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana
+          # env:
+          resources:
+            # keep request = limit to keep this container in guaranteed class
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          env:
+            - name: GF_AUTH_BASIC_ENABLED
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "false"
+            - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+              value: Admin
+            - name: GF_SECURITY_ADMIN_USER
+              value: "admin"
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: "Pa22word"
+            - name: GF_USERS_DEFAULT_THEME
+              value: "light"
+            # - name: GF_SERVER_ROOT_URL
+            #   value: /api/v1/proxy/namespaces/kube-system/services/monitoring-grafana/
+          volumeMounts:
+          - name: grafana-persistent-storage
+            mountPath: /var/lib/grafana
+          - name: datasource
+            mountPath: /etc/grafana/provisioning/datasources/
+          - name: dashboard-providers
+            mountPath: /etc/grafana/provisioning/dashboards
+          - name: dashboards
+            mountPath: /var/lib/grafana/dashboards
+      volumes:
+      - name: grafana-persistent-storage
+        emptyDir: {}
+      - name: datasource
+        configMap:
+          name: grafana-datasource
+      - name: dashboard-providers
+        configMap:
+          name: grafana-dashboard-providers
+      - name: dashboards
+        configMap:
+          name: grafana-dashboards
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blackbox-configmap
+  namespace: monitoring
+data:
+  blackbox.yml: |
+    modules:
+      http_2xx:
+        prober: http
+        timeout: 5s
+        http:
+          valid_status_codes: [200,401]  # Defaults to 2xx
+          method: GET
+          no_follow_redirects: false
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+          tls_config:
+            insecure_skip_verify: false
+          preferred_ip_protocol: ip4
+      http_post_2xx:
+        prober: http
+        timeout: 5s
+        http:
+          method: POST
+      http_basic_auth_example:
+        prober: http
+        timeout: 5s
+        http:
+          method: POST
+          headers:
+            Host: "login.example.com"
+          basic_auth:
+            username: "username"
+            password: "mysecret"
+      http_custom_ca_example:
+        prober: http
+        http:
+          method: GET
+          tls_config:
+            ca_file: "/certs/my_cert.crt"
+      tls_connect:
+        prober: tcp
+        timeout: 5s
+        tcp:
+          tls: true
+      tcp_connect_example:
+        prober: tcp
+        timeout: 5s
+      imap_starttls:
+        prober: tcp
+        timeout: 5s
+        tcp:
+          query_response:
+            - expect: "OK.*STARTTLS"
+            - send: ". STARTTLS"
+            - expect: "OK"
+            - starttls: true
+            - send: ". capability"
+            - expect: "CAPABILITY IMAP4rev1"
+      smtp_starttls:
+        prober: tcp
+        timeout: 5s
+        tcp:
+          query_response:
+            - expect: "^220 ([^ ]+) ESMTP (.+)$"
+            - send: "EHLO prober"
+            - expect: "^250-STARTTLS"
+            - send: "STARTTLS"
+            - expect: "^220"
+            - starttls: true
+            - send: "EHLO prober"
+            - expect: "^250-AUTH"
+            - send: "QUIT"
+      irc_banner_example:
+        prober: tcp
+        timeout: 5s
+        tcp:
+          query_response:
+            - send: "NICK prober"
+            - send: "USER prober prober prober :prober"
+            - expect: "PING :([^ ]+)"
+              send: "PONG ${1}"
+            - expect: "^:[^ ]+ 001"
+      icmp_example:
+        prober: icmp
+        timeout: 5s
+        icmp:
+          preferred_ip_protocol: "ip4"
+          source_ip_address: "127.0.0.1"
+      dns_udp_example:
+        prober: dns
+        timeout: 5s
+        dns:
+          query_name: "www.prometheus.io"
+          query_type: "A"
+          valid_rcodes:
+          - NOERROR
+          validate_answer_rrs:
+            fail_if_matches_regexp:
+            - ".*127.0.0.1"
+            fail_if_not_matches_regexp:
+            - "www.prometheus.io.\t300\tIN\tA\t127.0.0.1"
+          validate_authority_rrs:
+            fail_if_matches_regexp:
+            - ".*127.0.0.1"
+          validate_additional_rrs:
+            fail_if_matches_regexp:
+            - ".*127.0.0.1"
+      dns_soa:
+        prober: dns
+        dns:
+          query_name: "prometheus.io"
+          query_type: "SOA"
+      dns_tcp_example:
+        prober: dns
+        dns:
+          transport_protocol: "tcp" # defaults to "udp"
+          preferred_ip_protocol: "ip4" # defaults to "ip6"
+          query_name: "www.prometheus.io"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blackbox-exporter
+  namespace: monitoring
+  labels:
+    app: blackbox-exporter
+spec:
+  selector:
+    matchLabels:
+      app: blackbox-exporter
+  replicas: 1
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  progressDeadlineSeconds: 100
+  minReadySeconds: 5
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        app: blackbox-exporter
+    spec:
+      containers:
+      - name: blackbox
+        image: prom/blackbox-exporter:latest
+        args:
+          - '--config.file=/etc/blackbox-exporter/blackbox.yml'
+        imagePullPolicy: Always
+        ports:
+        - name: blackbox
+          protocol: TCP
+          containerPort: 9115
+        livenessProbe:
+          tcpSocket:
+            port: blackbox
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 2
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/blackbox-exporter/
+      volumes:
+      - name: config-volume
+        configMap:
+          name: blackbox-configmap
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blackbox-exporter
+  namespace: monitoring
+  labels:
+    app: blackbox-exporter
+spec:
+  type: ClusterIP
+  selector:
+    app: blackbox-exporter
+  ports:
+  - name: blackbox
+    port: 9115
+    protocol: TCP
+    targetPort: blackbox
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+spec:
+  rules:
+    - host: grafana.dockr.life
+      http:
+        paths:
+        - path: /
+          backend:
+            # This assumes http-svc exists and routes to healthy endpoints
+            serviceName: grafana
+            servicePort: 3000
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: prom-ingress
+  namespace: monitoring
+spec:
+  rules:
+    - host: prom.dockr.life
+      http:
+        paths:
+        - path: /
+          backend:
+            # This assumes http-svc exists and routes to healthy endpoints
+            serviceName: prometheus-svc
+            servicePort: 9090
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`grafana.dockr.life`)
+      kind: Rule
+      services:
+        - name: grafana
+          port: 3000
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: prom-ingress
+  namespace: monitoring
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`prom.dockr.life`)
+      kind: Rule
+      services:
+        - name: prometheus-svc
+          port: 9090
