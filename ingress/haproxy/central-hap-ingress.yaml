@@ -8,9 +8,9 @@ metadata:
 spec:
   tls:
   - hosts:
-    - central.chrisporter.com
+    - central.example.com
   rules:
-  - host: central.chrisporter.com
+  - host: central.example.com
     http:
       paths:
       - backend:
