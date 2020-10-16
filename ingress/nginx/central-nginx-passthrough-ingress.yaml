@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: central-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+  namespace: stackrox
+spec:
+  rules:
+  - http:
+      paths:
+        - path: /
+          backend:
+            serviceName: central
+            servicePort: 443

@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPCS"
+  name: central-ingress
+  namespace: stackrox
+spec:
+  rules:
+  - host: central.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: central
+          servicePort: 443
+  tls:
+  - secretName: central-default-tls-cert
+    hosts:
+    - central.example.com
+
+
