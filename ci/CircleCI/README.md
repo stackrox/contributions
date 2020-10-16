@@ -1,6 +1,7 @@
 ﻿# CircleCI Orb Sample 
  
  OWNER:  neil@stackrox.com
+ LATEST TESTED: 3.0.50.0
  
  This sample uses an inline orb that exposes two jobs 
  
