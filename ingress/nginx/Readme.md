@@ -16,3 +16,6 @@ Please review the [documentation for TLS/HTTPS](https://kubernetes.github.io/ing
 In a standard installation of the ingress controller you can add this to a running pod with:
 
 `kubectl edit nginx-ingress-controller -n kube-system`
+
+OWNER: srcporter  
+LAST TESTED VERSION: 3.0.50.0
