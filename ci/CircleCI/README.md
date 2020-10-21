@@ -1,9 +1,6 @@
 ﻿# CircleCI Orb Sample 
  
- OWNER:  neilcar
- 
- LATEST TESTED: 3.0.50.0
- 
+
  This sample uses an inline orb that exposes two jobs 
  
  ```
@@ -35,3 +32,6 @@
     type: string
 ```    
   
+ OWNER:  neilcar
+ 
+ LATEST TESTED: 3.0.50.0
