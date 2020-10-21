@@ -1,6 +1,6 @@
 ﻿# CircleCI Orb Sample 
  
- OWNER:  neil@stackrox.com
+ OWNER:  neilcar
  
  LATEST TESTED: 3.0.50.0
  
