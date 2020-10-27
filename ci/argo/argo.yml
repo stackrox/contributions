@@ -12,6 +12,8 @@ spec:
       value: https://github.com/logankimmel/hello-go.git
     - name: image-repo
       value: logankimmel/hello-go
+    - name: central
+      value: "{{workflow.parameters.central}}"
   templates:
   - name: cicd
     steps:
