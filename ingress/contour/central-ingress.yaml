@@ -1,0 +1,14 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: central
+  namespace: stackrox
+spec:
+  tcpproxy:
+    services:
+    - name: central
+      port: 443
+  virtualhost:
+    fqdn: central.blah.blar.tld
+    tls:
+      passthrough: true
