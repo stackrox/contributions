@@ -1,0 +1,215 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: hello-go-
+  labels:
+    workflows.argoproj.io/archive-strategy: "false"
+spec:
+  entrypoint: cicd
+  arguments:
+    parameters:
+    - name: git-repo-path
+      value: https://github.com/logankimmel/hello-go.git
+    - name: image-repo
+      value: logankimmel/hello-go
+  templates:
+  - name: cicd
+    steps:
+      - - name: checkout
+          template: checkout
+          arguments:
+            parameters:
+            - name: git-repo-path
+              value: "{{workflow.parameters.git-repo-path}}"
+      - - name: build-push-docker
+          template: build-push-docker
+          arguments:
+            artifacts:
+            - name: git-repo
+              from: "{{steps.checkout.outputs.artifacts.source}}"
+            parameters:
+            - name: image-repo
+              value: "{{workflow.parameters.image-repo}}"
+            - name: image-tag
+              value: "{{steps.checkout.outputs.parameters.tag}}"
+      - - name: image-scan
+          template: image-scan
+          arguments:
+            parameters:
+            - name: image-repo
+              value: "{{workflow.parameters.image-repo}}"
+            - name: image-tag
+              value: "{{steps.checkout.outputs.parameters.tag}}"
+            - name: central
+              value: "{{workflow.parameters.central}}"
+      - - name: image-check
+          template: image-check
+          arguments:
+            parameters:
+            - name: image-tag
+              value: "{{steps.checkout.outputs.parameters.tag}}"
+            - name: image-repo
+              value: "{{workflow.parameters.image-repo}}"
+            - name: central
+              value: "{{workflow.parameters.central}}"
+      - - name: update-deployment
+          template: update-deployment
+          arguments:
+            parameters:
+            - name: image-tag
+              value: "{{steps.checkout.outputs.parameters.tag}}"
+            - name: image-repo
+              value: "{{workflow.parameters.image-repo}}"
+            artifacts:
+            - name: git-repo
+              from: "{{steps.checkout.outputs.artifacts.source}}"
+      - - name: deployment-check
+          template: deployment-check
+          arguments:
+            parameters:
+            - name: central
+              value: "{{workflow.parameters.central}}"
+            artifacts:
+            - name: deployment
+              from: "{{steps.update-deployment.outputs.artifacts.deployment}}"
+  - name: checkout
+    inputs:
+      parameters:
+      - name: git-repo-path
+      artifacts:
+      - name: git-repo
+        path: /src
+        git:
+          repo: "{{inputs.parameters.git-repo-path}}"
+    metadata:
+      labels:
+        app: argo
+    container:
+      image: alpine/git
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+        limits:
+          cpu: 400m
+          memory: 800Mi
+      command: [sh, -c]
+      args: ["cd /src && git rev-parse --short HEAD > /tmp/git-commit"]
+    outputs:
+      artifacts:
+      - name: source
+        path: /src
+      parameters:
+      - name: tag
+        valueFrom:
+          path: /tmp/git-commit
+  - name: build-push-docker
+    inputs:
+      artifacts:
+      - name: git-repo
+        path: /src
+      parameters:
+      - name: image-tag
+      - name: image-repo
+    metadata:
+      labels:
+        app: argo
+    container:
+      image: gcr.io/kaniko-project/executor:debug
+      workingDir: /src
+      command: ["/kaniko/executor"]
+      args: [
+        '--context', '/src', '--dockerfile', '/src/full.Dockerfile', '--destination',
+        "{{inputs.parameters.image-repo}}:{{inputs.parameters.image-tag}}"
+        ]
+      volumeMounts:
+      - name: regcred
+        mountPath: /kaniko/.docker
+  - name: image-scan
+    inputs:
+      parameters:
+      - name: image-tag
+      - name: image-repo
+      - name: central
+    metadata:
+      labels:
+        app: argo
+    container:
+      image: stackrox.io/roxctl:3.0.50.0
+      volumeMounts:
+      - name: api-token
+        mountPath: /api-token
+      command: ["/roxctl"]
+      args: ["image", "scan", "--image", "{{inputs.parameters.image-repo}}:{{inputs.parameters.image-tag}}", "-e", "{{inputs.parameters.central}}", "--token-file", "/api-token/data"]
+  
+  - name: image-check
+    inputs:
+      parameters:
+      - name: image-tag
+      - name: image-repo
+      - name: central
+    metadata:
+      labels:
+        app: argo
+    container:
+      image: stackrox.io/roxctl:3.0.50.0
+      volumeMounts:
+      - name: api-token
+        mountPath: /api-token
+      command: ["/roxctl"]
+      args: [
+        "image", "check", "--image", "{{inputs.parameters.image-repo}}:{{inputs.parameters.image-tag}}", 
+        "-e", "{{inputs.parameters.central}}", "--token-file", "/api-token/data", "--json"
+      ]
+
+  - name: update-deployment
+    inputs:
+      artifacts:
+      - name: git-repo
+        path: /src
+      parameters:
+      - name: image-tag
+      - name: image-repo
+    metadata:
+      labels:
+        app: argo
+    container:
+      image: alpine
+      command: [/bin/sh, -c]
+      args: ["sed s#%IMAGE%#{{inputs.parameters.image-repo}}:{{inputs.parameters.image-tag}}#g /src/deployment.yaml > /tmp/deployment.yaml"]
+    outputs:
+      artifacts:
+      - name: deployment
+        path: /tmp/deployment.yaml
+
+  - name: deployment-check
+    inputs:
+      parameters:
+      - name: central
+      artifacts:
+      - name: deployment
+        path: /tmp/deployment.yaml
+    metadata:
+      labels:
+        app: argo
+    container:
+      image: stackrox.io/roxctl:3.0.50.0
+      volumeMounts:
+      - name: api-token
+        mountPath: /api-token
+      command: ["/roxctl"]
+      args: ["deployment", "check", "--file", "/tmp/deployment.yaml", "-e", "{{inputs.parameters.central}}", "--token-file", "/api-token/data"]
+  
+  imagePullSecrets:
+  - name: stackrox-io
+  ttlStrategy:
+    secondsAfterCompletion: 3600
+  volumes:
+  - name: regcred
+    secret:
+      secretName: regcred
+  - name: api-token
+    secret:
+      secretName: rox-api
+    
+   
