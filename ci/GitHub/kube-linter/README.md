@@ -22,6 +22,6 @@ The action takes two parameters.
 ```
 
 * `directory` is mandatory -- this is the directory of deployment files to scan.  
-* `config` is options -- this is the path to a [configuration file](https://github.com/stackrox/kube-linter/blob/main/config.yaml.example) if you wish to use a non-default configuration.
+* `config` is optional -- this is the path to a [configuration file](https://github.com/stackrox/kube-linter/blob/main/config.yaml.example) if you wish to use a non-default configuration.
 
 LATEST TESTED VERSION: 0.1.1
