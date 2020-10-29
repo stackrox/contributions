@@ -1,0 +1,20 @@
+name: Check Kubernetes YAMLs
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Scan repo
+        id: kube-lint-repo
+        uses: ./.github/actions/kube-lint
+        with:
+          directory: yamls
+          config: .kube-linter/config.yaml
+

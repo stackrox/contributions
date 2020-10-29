@@ -1,0 +1,35 @@
+name: 'kube-linter'
+description: 'Scan directory with kube-linter'
+inputs:
+  directory:
+    description: 'Directory to scan '
+    required: true
+  config:
+    description: 'Path to config file'
+    required: false
+outputs:
+  lint-txt:
+    description: 'Output from linting'
+    value: ${{ steps.lint.outputs.lint-txt }}
+runs:
+  using: "composite"
+  steps:
+    - name: Download latest kube-linter
+      run: |
+        LOCATION=$(curl -s https://api.github.com/repos/stackrox/kube-linter/releases/latest \
+        | grep "tag_name" \
+        | awk '{print "https://github.com/stackrox/kube-linter/releases/download/" substr($2, 2, length($2)-3) "/kube-linter-linux.tar.gz"}')
+        curl -s -L -o kube-linter-linux.tar.gz $LOCATION
+        tar -xf kube-linter-linux.tar.gz -C "${GITHUB_WORKSPACE}/"
+      shell: bash
+    - id: lint
+      run: |
+        cd "${GITHUB_WORKSPACE}"
+        if [ -z ${{ inputs.config }} ]; then
+          export CONFIG=""
+        else
+          export CONFIG="--config ${{ inputs.config }}"
+        fi
+        ./kube-linter $CONFIG lint ${{ inputs.directory }}
+      shell: bash
+
