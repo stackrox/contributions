@@ -6,7 +6,7 @@ Quick deployment:
 
 1.  Create a new GitHub repo.
 2.  Push all files from this sample into the repo.
-3.  The `mail.yml` workflow will run as an action every time there's a new push to this repo.
+3.  The `main.yml` workflow will run as an action every time there's a new push to this repo.
 
 More info on creating a repo with a GitHub action like this and using it broadly can be [found here](https://docs.github.com/en/free-pro-team@latest/actions/creating-actions/creating-a-composite-run-steps-action)
 
