@@ -1,0 +1,8 @@
+scan:
+    stage: test
+    script:
+      - "curl -k -L -H \"Authorization: Bearer $ROX_API_TOKEN\" https://$ROX_CENTRAL_ENDPOINT/api/cli/download/roxctl-linux --output ./roxctl  "
+      - chmod a+x ./roxctl
+      - ./roxctl image scan -e $ROX_CENTRAL_ENDPOINT --force --image my.registry/repo/image:latest
+      - ./roxctl image check -e $ROX_CENTRAL_ENDPOINT --image my.registry/repo/image:latest
+  
