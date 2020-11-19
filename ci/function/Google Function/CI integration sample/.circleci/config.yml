@@ -1,0 +1,38 @@
+# StackRox Google Function scan sample
+# author neil@stackrox.com
+
+version: 2.1
+jobs:
+  scan:
+    docker:
+      - image: cimg/base:2020.10
+    steps:
+      - run: |
+          ROX_RETURN=$(curl -L -H "Authorization: Bearer $GOOG_API_TOKEN" https://<<project>>.cloudfunctions.net/roxctl_image_check \
+            --silent --fail --show-error \
+            --header "Content-Type: application/json" \
+            --request POST \
+            --data "{\"rox_central_endpoint\": \"$ROX_CENTRAL_ENDPOINT\",\"rox_api_token\": \"$ROX_API_TOKEN\",\"rox_image\": \"mysql:5.6.30\"}")
+          echo $ROX_RETURN | jq --raw-output '.output'
+          if [ "$(echo $ROX_RETURN | jq --raw-output '.build')" = "fail" ]; then
+            exit 1
+          fi
+          
+# This uses cURL to execute the Google Cloud Function.  The function returns JSON with pass/fail and the output.
+# We echo the output and, finally, if the result is fail, exit with a non-zero return code to fail the build        
+
+# Replace https://<<project>> with the appropriate location of the Google Cloud Function.
+
+# Parameters for the StackRox Central and authentication to the Google Cloud Function are configured as environment variables
+# in CircleCI.
+#  
+# `GOOG_API_TOKEN`: A Bearer token for access to the roxctl_image_check function
+# `ROX_CENTRAL_ENDPOINT`: the hostname/IP and port for Central (`central.stackrox.com:443`)
+# `ROX_API_TOKEN`: an API token from Central with at least CI privileges
+
+workflows:
+  scanimage:
+    when: always
+    jobs:
+      - scan:
+          name: scan
