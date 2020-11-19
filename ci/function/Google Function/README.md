@@ -1,7 +1,7 @@
 # Google Function CI Scan Sample
  
 
-This sample uses a Google Function to scan an image and return results.  This is useful for scanning builds in hosted CI solutions when Central is not accessible from the Internet -- the function can be used as a proxy.
+This sample uses a Google Cloud Function to scan an image and return results.  This is useful for scanning builds in hosted CI solutions when Central is not accessible from the Internet -- the function can be used as a proxy.
  
 The `roxctl_image_check` directory has the sample Python function.  This script takes an HTTP POST with a JSON body containing the parameters and returns a pass/fail and the policy check output.
 
