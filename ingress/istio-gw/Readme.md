@@ -1,6 +1,6 @@
 # Istio Gateway Ingress configuration for StackRox Central
 
-This configuration provides a simple Istio Gateway ssl-passthrough ingress for StackRox Central. Tested on Istio v1.8.
+This configuration provides a simple Istio Gateway tls-passthrough ingress for StackRox Central. Tested on Istio v1.8.
 
 ## Notes
 * By default, Istio's Ingress Gateway creates a loadbalancer service. You can see the assigned IP or hostname using `kubectl -n istio-system get svc`
