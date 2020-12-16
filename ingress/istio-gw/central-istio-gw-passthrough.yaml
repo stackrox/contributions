@@ -1,0 +1,50 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: central
+  namespace: stackrox
+spec:
+  host: central.stackrox
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_CONN
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: central-gateway
+  namespace: stackrox
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: TLS
+    tls:
+      mode: PASSTHROUGH
+    hosts:
+    - "central.example.com"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: central
+  namespace: stackrox
+spec:
+  hosts:
+  - central.example.com
+  gateways:
+  - central-gateway
+  tls:
+  - match:
+    - port: 443
+      sniHosts:
+      - central.example.com
+    route:
+    - destination:
+        host: central
+        port:
+          number: 443
+
