@@ -10,4 +10,5 @@ This configuration provides a simple Istio Gateway ssl-passthrough ingress for S
 * `central-istio-gw-passthrough.yaml` The Gateway, VirtualService, and DestinationRule  definitions for the stackrox namespace
 
 OWNER: srcporter
+
 LAST TESTED VERSION: 3.0.52.1
