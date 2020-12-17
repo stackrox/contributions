@@ -41,7 +41,8 @@ orbs:
               rox_api_token: <<parameters.rox_api_token>>
               rox_central_endpoint: <<parameters.rox_central_endpoint>>
           - run: >-
-              ./roxctl image scan -e <<parameters.rox_central_endpoint>> --image <<parameters.rox_image_scan>>
+              ./roxctl image scan -e <<parameters.rox_central_endpoint>> --image <<parameters.rox_image_scan>> --format pretty
+              # --format switch requires roxctl 3.0.53.0 or later
           - run: >-
               ./roxctl image check -e <<parameters.rox_central_endpoint>> --image <<parameters.rox_image_scan>>
     commands:
