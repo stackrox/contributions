@@ -10,6 +10,10 @@ inputs:
   image:
     description: 'Full name of the image to scan -- gcr.io/stackrox/testimage:5.1'
     required: true
+  format:
+    description: 'Format of output.  Valid values are json, csv, and pretty'
+    required: 'false'
+    default: 'pretty'
 runs:
   using: "composite"
   steps:
@@ -20,8 +24,7 @@ runs:
       shell: bash
     - id: scan-info
       run: |
-        ./roxctl image scan -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }}
+        ./roxctl image scan -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }} --format ${{ inputs.format }}
       env:
         ROX_API_TOKEN: ${{ inputs.api-token }}
       shell: bash
-
