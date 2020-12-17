@@ -33,4 +33,4 @@ All parameters are mandatory.  You should store the API token and the endpoint f
 * `central-endpoint` is the location of the StackRox Central deployment.  
 * `api-token` is the StackRox API token to be used.  This token must have at least CI privileges.
 
-LATEST TESTED VERSION: 3.0.50.0
+LATEST TESTED VERSION: 3.0.53.0
