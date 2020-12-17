@@ -16,4 +16,4 @@ This configuration provides a Traefik ingress definition for StackRox central wh
 
 OWNER: srcporter
 
-LAST TESTED VERSION: 3.0.52.1
+LAST TESTED VERSION: 3.0.53.0
