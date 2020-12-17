@@ -1,0 +1,18 @@
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: central-ingress
+  namespace: stackrox
+
+spec:
+  rules:
+    - host: central.example.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: central
+              servicePort: 443
+  tls:
+    - secretName: stackrox-central-tls
+
