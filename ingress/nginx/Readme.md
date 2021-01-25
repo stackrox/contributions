@@ -15,7 +15,22 @@ Please review the [documentation for TLS/HTTPS](https://kubernetes.github.io/ing
 
 In a standard installation of the ingress controller you can add this to a running pod with:
 
-`kubectl edit nginx-ingress-controller -n kube-system`
+`kubectl edit nginx-ingress-controller -n ingress-nginx`
+
+Change the containers spec for the controller to add the --nenable-ssl-passthrough argument:
+
+    spec:
+      containers:
+      - args:
+        - /nginx-ingress-controller
+        - --publish-service=$(POD_NAMESPACE)/ingress-nginx-controller
+        - --election-id=ingress-controller-leader
+        - --ingress-class=nginx
+        - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
+        - --validating-webhook=:8443
+        - --validating-webhook-certificate=/usr/local/certificates/cert
+        - --validating-webhook-key=/usr/local/certificates/key
+        - --enable-ssl-passthrough
 
 OWNER: srcporter  
-LAST TESTED VERSION: 3.0.50.0
+LAST TESTED VERSION: 3.0.54.0
