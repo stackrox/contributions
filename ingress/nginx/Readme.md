@@ -17,9 +17,8 @@ In a standard installation of the ingress controller you can add this to a runni
 
 `kubectl edit nginx-ingress-controller -n kube-system`
 
-And appending to the arguments in the containers spec:
-
-    spec:
+and appending to the arguments in the containers spec:
+`    spec:
       containers:
       - args:
         - /nginx-ingress-controller
@@ -30,7 +29,7 @@ And appending to the arguments in the containers spec:
         - --validating-webhook=:8443
         - --validating-webhook-certificate=/usr/local/certificates/cert
         - --validating-webhook-key=/usr/local/certificates/key
-        - --enable-ssl-passthrough
+        - --enable-ssl-passthrough`
 
 OWNER: srcporter  
 LAST TESTED VERSION: 3.0.54.0
