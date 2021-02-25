@@ -9,6 +9,9 @@ This script consumes a policy definition json file and either creates or updates
 **Required Argument:**
 * `$1 = path/to/policy_definition.json`
 
+**Required Tools:**
+* `jq` is used by this script and must be installed.  Installation instructions for various platforms can be found [here](https://stedolan.github.io/jq/download/)
+
 **Usage**
 `./policy-update.sh /policies/root-user.json`
 
