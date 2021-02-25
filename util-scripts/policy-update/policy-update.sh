@@ -67,7 +67,7 @@ fi
 id=$(echo $get_response | jq -r '.policies[0].id')
 echo $id
 
-#Compare the exiting policy to the new definition
+# Compare the existing policy to the new definition
 echo "Policy with name: ${name}, already exists. Comparing policy defintions"
 current_policy=$(curl_get_policy_details "${id}" | jq 'del(. | .id, .lastUpdated, .policyVersion, .SORTName, .SORTLifecycleStage)' )
 echo ""
