@@ -18,7 +18,7 @@ if [[ -z "$1" ]]; then
 fi
 
 output_file="$1"
-echo '"Policy", "Description", "Severity", "Cluster", "Namespace", "Deployment' > "${output_file}"
+echo '"Policy", "Description", "Severity", "Cluster", "Namespace", "Deployment"' > "${output_file}"
 
 function curl_central() {
   curl -sk -H "Authorization: Bearer ${ROX_API_TOKEN}" "https://${ROX_ENDPOINT}/$1"
