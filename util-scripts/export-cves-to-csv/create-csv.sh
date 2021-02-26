@@ -27,12 +27,7 @@ function curl_central() {
 # Collect all alerts
 cvss=7
 
-res="$(curl_central "v1/alerts?query=Policy:Fixable CVSS >= ${cvss}")"
-
-# If no results, then exist
-if [[ "$(echo "${res}" | jq '.alerts | length')" == "0" ]]; then
-   break
-fi
+res="$(curl_central "v1/alerts?query=Policy%3AFixable%20CVSS%20%3E%3D%20${cvss}")"
 
 # Iterate over all deployments and get the full deployment
 for deployment_id in $(echo "${res}" | jq -r .alerts[].deployment.id); do
