@@ -12,7 +12,7 @@ if [[ -z "${ROX_API_TOKEN}" ]]; then
 fi
 
 if [[ -z "$1" ]]; then
-  echo >&2 "usage: create-csv.sh <output filename>"
+  echo >&2 "usage: policy-update.sh <input filename>"
   exit 1
 fi
 
@@ -68,7 +68,7 @@ id=$(echo $get_response | jq -r '.policies[0].id')
 echo $id
 
 # Compare the existing policy to the new definition
-echo "Policy with name: ${name}, already exists. Comparing policy defintions"
+echo "Policy with name: ${name}, already exists. Comparing policy definitions"
 current_policy=$(curl_get_policy_details "${id}" | jq 'del(. | .id, .lastUpdated, .policyVersion, .SORTName, .SORTLifecycleStage)' )
 echo ""
 echo "Current Policy:"
