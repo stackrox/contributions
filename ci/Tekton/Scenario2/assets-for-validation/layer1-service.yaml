@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: layer1
+  labels:
+    app: layer1    
+spec:
+  ports:
+  - name: http
+    port: 8080
+  selector:
+    app: layer1
