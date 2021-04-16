@@ -17,7 +17,6 @@ foreach $file (@filesToScanList) {
   $scannedFileName = substr($file, 0, index($file, ".scan-result"));
   $policiesFailed = "";
   $policyFailures = 0;
-  print "----".$fileData."\n";
 
   $_ = $fileData;
 
