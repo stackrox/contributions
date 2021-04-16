@@ -3,6 +3,9 @@ $numberFilesToScan = @filesToScanList;
 $cleanFiles = 0;
 $totalPolicyFailures = 0;
 
+print "-------------------------------------------------------------------------------\n";
+print "Files to scan : ".$numberFilesToScan."\n\n";
+
 foreach $file (@filesToScanList) {
   open scanFileHandle, $file;
   $fileData = "";
@@ -15,7 +18,7 @@ foreach $file (@filesToScanList) {
   $policiesFailed = "";
   $policyFailures = 0;
   if ($fileData eq "The scanned resources passed all policies\n") {
-    print $scannedFileName." passes app policies.\n";
+    print $scannedFileName." passes all policies.\n";
     $cleanFiles++;
   } else {
     @splitResultLines = split("\n", $fileData);
@@ -37,10 +40,20 @@ foreach $file (@filesToScanList) {
     print $scannedFileName." has ".$policyFailures." policy failures :: \n";
     print $policiesFailed;
   }
-  print "-------------------------------------------------------------------------------\n";
+  print "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
 }
-  print "Files passing all policies : ".$cleanFiles." of ".$numberFilesToScan."\n";
-  print "Total failures : ".$totalPolicyFailures."\n";
-  print "Unique policy violations : ".keys(%UniquePolicyFailures)."\n";
+  print "\nFiles passing all policies : ".$cleanFiles." of ".$numberFilesToScan."\n";
+  print "Total failures : ".$totalPolicyFailures."\n\n";
+  
+
+  print "-------------------------------------------------------------------------------\n";
+  print "Unique policy violations : ".keys(%UniquePolicyFailures)."\n\n";
+
+foreach my $violation (sort keys %UniquePolicyFailures) {
+    printf $violation."\n";
+}
+
+print "-------------------------------------------------------------------------------\n";
+
 
   exit($totalPolicyFailures);
