@@ -17,7 +17,11 @@ foreach $file (@filesToScanList) {
   $scannedFileName = substr($file, 0, index($file, ".scan-result"));
   $policiesFailed = "";
   $policyFailures = 0;
-  if ($fileData eq "The scanned resources passed all policies\n") {
+  print "----".$fileData."\n";
+
+  $_ = $fileData;
+
+  if (m/The scanned resources passed all policies/) {
     print $scannedFileName." passes all policies.\n";
     $cleanFiles++;
   } else {
