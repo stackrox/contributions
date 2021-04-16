@@ -43,4 +43,4 @@ foreach $file (@filesToScanList) {
   print "Total failures : ".$totalPolicyFailures."\n";
   print "Unique policy violations : ".keys(%UniquePolicyFailures)."\n";
 
-  return($totalPolicyFailures);
+  exit($totalPolicyFailures);
