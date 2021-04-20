@@ -1,0 +1,98 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: config-validation
+spec:
+  params:
+  - name: acs_central_endpoint
+    type: string
+  - name: acs_api_token
+    type: string
+  - name: git-url
+    type: string
+  - name: git-revision
+    type: string
+  - name: file-location-in-git-repo
+    type: string  
+  - name: recursive-search
+    type: string
+  - name: include-rox-output
+    type: string
+  - name: perl-script-location
+    type: string
+  tasks:
+##------------------------------------------------------------------
+# Git clone task
+##------------------------------------------------------------------        
+  - name: git-clone-workspace
+    params:
+    - name: url
+      value: $(params.git-url)
+    - name: revision
+      value: $(params.git-revision)
+    - name: verbose
+      value: 'false'      
+    taskRef:
+      kind: ClusterTask
+      name:  git-clone
+    workspaces:
+    - name: output
+      workspace: files
+##------------------------------------------------------------------
+# Perform resource deployment check on files of interest
+##------------------------------------------------------------------          
+  - name: resource-deployment-check
+    params:
+    - name: acs_central_endpoint
+      value: $(params.acs_central_endpoint)
+    - name: acs_api_token
+      value: $(params.acs_api_token)
+    - name: source_location
+      value: $(params.file-location-in-git-repo)
+    - name: recursive-search
+      value: $(params.recursive-search)
+    taskRef:
+      kind: Task
+      name: acs-deployment-check
+    workspaces:
+    - name: files
+      workspace: files
+    runAfter:
+    - git-clone-workspace
+##------------------------------------------------------------------
+# Analyse the results from the deployment check
+##------------------------------------------------------------------          
+  - name: process-deployment-check-results
+    params: 
+    - name: include-rox-output
+      value: $(params.include-rox-output)
+    - name: perl-script-location
+      value: $(params.perl-script-location)
+    taskRef:
+      kind: Task
+      name: acs-process-scan-results
+    runAfter:
+    - resource-deployment-check
+    workspaces:
+    - name: files
+      workspace: files
+##------------------------------------------------------------------
+# Dummy deploy phase - only do this if all resource checks are clean
+##------------------------------------------------------------------          
+  - name: dummy-deploy-phase
+    taskRef:
+      kind: Task
+      name: deploy
+    params:
+    - name: exit-status
+      value: $(tasks.process-deployment-check-results.results.scan-result)
+    when:
+    - input: "$(tasks.process-deployment-check-results.results.scan-result)"
+      operator: in
+      values: 
+      - "pass"
+##------------------------------------------------------------------
+# Workspace definitions
+##------------------------------------------------------------------       
+  workspaces:
+  - name: files
