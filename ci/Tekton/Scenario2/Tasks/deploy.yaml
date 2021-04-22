@@ -3,9 +3,6 @@ kind: Task
 metadata:
   name: deploy
 spec:
-  params:
-  - name: exit-status
-    type: string
   steps:
     - name: dummy-deploy-phase
       image: registry.access.redhat.com/rhel-minimal:7.9-335
@@ -13,5 +10,3 @@ spec:
         #!/usr/bin/env bash
 
         echo "dummy deploy phase ...."
-
-        echo $(params.exit-status)
