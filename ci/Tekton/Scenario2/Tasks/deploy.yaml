@@ -1,0 +1,12 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: deploy
+spec:
+  steps:
+    - name: dummy-deploy-phase
+      image: registry.access.redhat.com/rhel-minimal:7.9-335
+      script: >-
+        #!/usr/bin/env bash
+
+        echo "dummy deploy phase ...."

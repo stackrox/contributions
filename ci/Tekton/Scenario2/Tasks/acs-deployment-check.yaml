@@ -1,0 +1,72 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: acs-deployment-check
+spec:
+  params:
+    - name: acs_central_endpoint
+      description: Secret containing the address:port tuple for ACS Central (example - rox.stackrox.io:443)
+      type: string
+    - name: acs_api_token
+      description: Secret containing the ACS API token with CI permissions
+      type: string
+    - name: source_location
+      description: Location of the file(s) to be scanned
+      type: string
+    - name: recursive-search
+      description: search for files recursively in directory tree
+      type: string
+  steps:
+##------------------------------------------------------------------
+# Rox deployment check - check deployment resource files
+##------------------------------------------------------------------      
+    - name: rox-deployment-check 
+      env:
+        - name: ROX_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: acs_api_token
+              name: $(params.acs_api_token)
+        - name: ROX_CENTRAL_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              key: acs_central_endpoint
+              name: $(params.acs_central_endpoint)
+      image: registry.access.redhat.com/rhel-minimal:7.9-335
+      resources: {}
+      script: >-
+        #!/usr/bin/env bash
+
+        set +x
+
+        curl -s -k -L -H "Authorization: Bearer $ROX_API_TOKEN"
+        https://$ROX_CENTRAL_ENDPOINT/api/cli/download/roxctl-linux --output
+        ./roxctl > /dev/null; echo "Getting roxctl"
+
+        chmod +x ./roxctl  > /dev/null
+
+        if [[ "$(params.recursive-search)" == "true" ]]; then
+      
+          fileList=`find /files/$(params.source_location) -name '*.yaml' -o -name '*.yml'`
+
+        else
+
+          fileList=`ls /files/$(params.source_location)/*.y*ml`
+
+        fi
+
+        for file in $fileList        
+
+        do
+          echo "Deployment check on file : $file"
+
+          ./roxctl deployment check --insecure-skip-tls-verify -e $ROX_CENTRAL_ENDPOINT -f $file > $file.scan-result
+
+          cp $file.scan-result /files
+        done
+
+
+      workingDir: /workspace
+  workspaces:
+  - name: files
+    mountPath: /files
