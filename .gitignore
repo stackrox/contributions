@@ -43,4 +43,5 @@ Thumbs.db
 sensor*.zip
 tmp
 /central-bundle/
+*.scan-result
 
