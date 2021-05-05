@@ -44,6 +44,6 @@ sensor*.zip
 tmp
 /central-bundle/
 *.scan-result
-
-ci/Tekton/Scenario2/*.json
-ci/Tekton/Scenario2/*.scan-result.wc
+*.scan-result.wc
+*.json
+*.json.wc
