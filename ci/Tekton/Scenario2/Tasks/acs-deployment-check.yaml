@@ -32,7 +32,7 @@ spec:
             secretKeyRef:
               key: acs_central_endpoint
               name: $(params.acs_central_endpoint)
-      image: registry.access.redhat.com/rhel-minimal:7.9-335
+      image: registry.access.redhat.com/ubi8/ubi:8.3-297
       resources: {}
       script: >-
         #!/usr/bin/env bash
@@ -45,6 +45,8 @@ spec:
 
         chmod +x ./roxctl  > /dev/null
 
+        yum install jq -y -q
+
         if [[ "$(params.recursive-search)" == "true" ]]; then
       
           fileList=`find /files/$(params.source_location) -name '*.yaml' -o -name '*.yml'`
@@ -55,16 +57,63 @@ spec:
 
         fi
 
-        for file in $fileList        
+        failTask="false"
 
+        for file in $fileList    
+     
         do
+
           echo "Deployment check on file : $file"
 
-          ./roxctl deployment check --insecure-skip-tls-verify -e $ROX_CENTRAL_ENDPOINT -f $file > $file.scan-result
+          ./roxctl deployment check --json --insecure-skip-tls-verify -e $ROX_CENTRAL_ENDPOINT -f $file > $file.scan-result
 
-          cp $file.scan-result /files
+          cat $file.scan-result | wc -c > $file.scan-result.wc
+
+          read charCount < $file.scan-result.wc
+
+          if test $charCount -gt 10
+
+          then
+
+            jq '.alerts[].policy.enforcementActions[] | select (. | contains("FAIL_BUILD_ENFORCEMENT"))' $file.scan-result 2>/dev/null | wc -c > $file.scan-result.wc 
+
+            read charCount < $file.scan-result.wc
+
+            if test $charCount -gt 2 
+
+            then
+
+              ## Issue found is enough to stop the CI process
+
+              failTask="true"
+            fi
+            
+            policyViolated=`jq '.alerts[].policy.name' $file.scan-result`
+
+            echo "Policy violated : "$policyViolated  
+
+            numberViolations=`jq '.alerts[].violations' $file.scan-result | jq length`
+
+            echo "  Number of violations : "$numberViolations
+
+            violations=`jq '.alerts[].violations[].message' $file.scan-result`
+
+            echo "  Specific violations"
+
+            echo "---------------------------------------------------"
+
+            eval 'for violation in '$violations'; do echo $violation; done'
+
+            echo "---------------------------------------------------"            
+            
+          fi
+          
+
+
+
+          echo "Overall status: $failTask"
+
         done
-
 
       workingDir: /workspace
   workspaces:

@@ -17,9 +17,9 @@ spec:
   - name: file-location-in-git-repo
     value: ci/Tekton/Scenario2/assets-for-validation    
   - name: recursive-search
-    value: "false"
+    value: "true"
   - name: include-rox-output
-    value: "false"
+    value: "true"
   - name: perl-script-location 
     value: /files/ci/Tekton/Scenario2/perl-script/
   workspaces:
@@ -30,5 +30,5 @@ spec:
             - ReadWriteOnce
           resources:
             requests:
-              storage: 1Gi
+              storage: 10Mi
         status: {}

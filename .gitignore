@@ -45,3 +45,5 @@ tmp
 /central-bundle/
 *.scan-result
 
+ci/Tekton/Scenario2/*.json
+ci/Tekton/Scenario2/*.scan-result.wc

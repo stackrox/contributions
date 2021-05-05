@@ -62,20 +62,20 @@ spec:
 ##------------------------------------------------------------------
 # Analyse the results from the deployment check
 ##------------------------------------------------------------------          
-  - name: process-deployment-check-results
-    params: 
-    - name: include-rox-output
-      value: $(params.include-rox-output)
-    - name: perl-script-location
-      value: $(params.perl-script-location)
-    taskRef:
-      kind: Task
-      name: acs-process-scan-results
-    runAfter:
-    - resource-deployment-check
-    workspaces:
-    - name: files
-      workspace: files
+#  - name: process-deployment-check-results
+#    params: 
+#    - name: include-rox-output
+#      value: $(params.include-rox-output)
+#    - name: perl-script-location
+#      value: $(params.perl-script-location)
+#    taskRef:
+#      kind: Task
+#      name: acs-process-scan-results
+#    runAfter:
+#    - resource-deployment-check
+#    workspaces:
+#    - name: files
+#      workspace: files
 ##------------------------------------------------------------------
 # Dummy deploy phase - only do this if all resource checks are clean
 ##------------------------------------------------------------------          
