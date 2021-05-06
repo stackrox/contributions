@@ -1,55 +1,51 @@
 #!/usr/bin/env bash
 
-cat output3.json | wc -c > output3.json.wc
+cat output2.json | wc -c > output2.json.wc
 
-read charCount < output3.json.wc
-
-echo $charCount
+read charCount < output2.json.wc
 
 if test $charCount -gt 10
 
 then
 
-    jq '.alerts[].policy.enforcementActions[] | select (. | contains("FAIL_BUILD_ENFORCEMENT"))' output3.json 2>/dev/null | wc -c > temp-wc
-
-    read charCount < temp-wc
-
-    echo $charCount
-
-    if test $charCount -gt 2
-        
-    then
-
-    ## Issue found is enough to stop the CI process
-
-        failTask="true"
-
-        echo "-- Build will be halted --"
-
-    else
-
-      echo "-- Policy violations will not stop the build process --"
-
-    fi
-
     numberAlerts=`jq '.alerts' output2.json | jq length` 
-
-    echo "Number of alerts $numberAlerts"
 
     counter=0
 
-    # $numberAlerts
-
     while [ $counter -lt $numberAlerts ]
     do
-  
-      jqCommand="jq --argjson index "$counter" '.alerts[\$index].policy.name' output2.json"
 
-      alertPolicyName=`eval $jqCommand` > /dev/null
+      jqCommandPolicyEnforcementCmd="jq --argjson index "$counter" '.alerts[\$index].policy.enforcementActions[] | select (. | contains(\"FAIL_BUILD_ENFORCEMENT\"))' output2.json 2>/dev/null | wc -c > temp-wc"
 
-      alertPolicyName=`echo $alertPolicyName | sed 's/\"//g'`
+      eval $jqCommandPolicyEnforcementCmd > /dev/null
 
-      echo "Policy Name : $alertPolicyName" 
+      jqCommandPolicyName="jq --argjson index "$counter" '.alerts[\$index].policy.name' output2.json"
+
+      alertPolicyName=`eval $jqCommandPolicyName` > /dev/null
+
+      alertPolicyName=`echo "$alertPolicyName" | sed s/\"//g`
+
+      echo "Alert policy name : $alertPolicyName"
+
+      read charCount < temp-wc
+
+      if test $charCount -gt 2
+          
+      then
+
+      ## Issue found is enough to stop the CI process
+
+          failTask="true"
+
+          echo "-- Build will be halted --"
+
+      else
+
+        echo "-- Policy violations will not stop the build process --"
+
+      fi
+
+      echo "- - - - - - - - - - - - - - - - - - - - - - - - - -"
 
       numberViolationsCmd="jq --argjson index \"$counter\" '.alerts[\$index].violations' output2.json | jq length"
      
@@ -64,13 +60,17 @@ then
 
         violation=`eval $jqCommand` >> /dev/null
 
-        echo "violation : -- $violation"
+        violation=`echo "$violation" | sed s/\"//g`
 
-        echo "---------------------------------------------------"
+        echo "violation : -- $violation"
 
         violationCounter=`expr $violationCounter + 1`
 
       done
+
+      echo "---------------------------------------------------"
+
+      echo ""
 
       counter=`expr $counter + 1`
 

@@ -17,11 +17,7 @@ spec:
   - name: file-location-in-git-repo
     value: ci/Tekton/Scenario2/assets-for-validation    
   - name: recursive-search
-    value: "true"
-  - name: include-rox-output
-    value: "true"
-  - name: perl-script-location 
-    value: /files/ci/Tekton/Scenario2/perl-script/
+    value: "false"
   workspaces:
     - name: files
       volumeClaimTemplate:

@@ -16,6 +16,8 @@ spec:
     - name: recursive-search
       description: search for files recursively in directory tree
       type: string
+  results:
+    - name: scan-result
   steps:
 ##------------------------------------------------------------------
 # Rox deployment check - check deployment resource files
@@ -74,46 +76,124 @@ spec:
           if test $charCount -gt 10
 
           then
+          
+            numberAlerts=`jq '.alerts' $file.scan-result | jq length` 
 
-            jq '.alerts[].policy.enforcementActions[] | select (. | contains("FAIL_BUILD_ENFORCEMENT"))' $file.scan-result 2>/dev/null | wc -c > $file.scan-result.wc 
-
-            read charCount < $file.scan-result.wc
-
-            if test $charCount -gt 2 
-
+            if test $numberAlerts -gt 1 
             then
 
-              ## Issue found is enough to stop the CI process
+              echo "$numberAlerts alerts found ..."
+              
+            else
 
-              failTask="true"
+              echo "1 alert found ..." 
+            
             fi
+
+            counter=0
+
+            while [ $counter -lt $numberAlerts ]
+            do            
+
+              jqCommandPolicyEnforcementCmd="jq --argjson index "$counter" '.alerts[\$index].policy.enforcementActions[] | select (. | contains(\"FAIL_BUILD_ENFORCEMENT\"))' $file.scan-result 2>/dev/null | wc -c > $file.scan-result.wc"
+
+              eval $jqCommandPolicyEnforcementCmd > /dev/null
+
+              jqCommandPolicyName="jq --argjson index "$counter" '.alerts[\$index].policy.name' $file.scan-result"
+
+              alertPolicyName=`eval $jqCommandPolicyName` > /dev/null
+
+              alertPolicyName=`echo "$alertPolicyName" | sed s/\"//g`
+
+              echo "Alert policy name : $alertPolicyName"
+
+              read charCount < $file.scan-result.wc
+
+              if test $charCount -gt 2 
+
+              then
+
+                ## Issue found is enough to stop the CI process
+
+                failTask="true"
+          
+                echo "-- Build will be halted --"
+
+              else
+
+                echo "-- Policy violations will not stop the build process --"
+
+              fi  
+
+              echo "- - - - - - - - - - - - - - - - - - - - - - - - - -"
+
+              numberViolationsCmd="jq --argjson index \"$counter\" '.alerts[\$index].violations' $file.scan-result | jq length"
+     
+              numberViolations=`eval $numberViolationsCmd` >> /dev/null
+
+              if test $numberViolations -eq 1 
+              then
+
+                echo "1 violation found ..." 
+
+              else
+
+                echo "$numberViolations violations found ..."
             
-            policyViolated=`jq '.alerts[].policy.name' $file.scan-result`
+              fi              
 
-            echo "Policy violated : "$policyViolated  
+              violationCounter=0
 
-            numberViolations=`jq '.alerts[].violations' $file.scan-result | jq length`
+              while [ "$violationCounter" -lt "$numberViolations" ]
+              do
 
-            echo "  Number of violations : "$numberViolations
+                jqCommand="jq --argjson index "$counter" --argjson violationIndex "$violationCounter" '.alerts[\$index].violations[\$violationIndex].message' $file.scan-result"
 
-            violations=`jq '.alerts[].violations[].message' $file.scan-result`
+                violation=`eval $jqCommand` >> /dev/null
 
-            echo "  Specific violations"
+                violation=`echo "$violation" | sed s/\"//g`
 
-            echo "---------------------------------------------------"
+                echo "violation : -- $violation"
 
-            eval 'for violation in '$violations'; do echo $violation; done'
+                violationCounter=`expr $violationCounter + 1`
 
-            echo "---------------------------------------------------"            
-            
+              done
+
+              echo "-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -"
+
+              echo ""
+
+              counter=`expr $counter + 1`
+
+            done           
+
+            echo "-----------------------------------------------------"
+
+          else
+
+            echo "-- No errors found in this file --"
+
+            echo ""
+
           fi
           
-
-
-
-          echo "Overall status: $failTask"
-
         done
+
+        if [[ "$failTask" == "true" ]]; then
+
+          echo "Setting overall result to fail"
+
+          echo -n "fail" | tee $(results.scan-result.path) >> /dev/null
+
+        else 
+
+          echo "Setting overall result to pass"
+
+          echo -n "pass" | tee $(results.scan-result.path) >> /dev/null
+
+        fi
+
+
 
       workingDir: /workspace
   workspaces:
