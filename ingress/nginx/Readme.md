@@ -17,7 +17,7 @@ In a standard installation of the ingress controller you can add this to a runni
 
 `kubectl edit nginx-ingress-controller -n ingress-nginx`
 
-Change the containers spec for the controller to add the --nenable-ssl-passthrough argument:
+Change the containers spec for the controller to add the --enable-ssl-passthrough argument:
 
     spec:
       containers:
