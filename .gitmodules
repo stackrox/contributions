@@ -1,3 +1,0 @@
-[submodule "util-scripts/image-cve-report"]
-	path = util-scripts/image-cve-report
-	url = https://github.com/mglantz/acs-image-cve.git
