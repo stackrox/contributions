@@ -9,3 +9,4 @@ We'd love your feedback! Please take care with any of the configurations in this
 ## What's in this Repository
 * `ci/`  samples for using StackRox *roxctl* command-line tool in CI/CD pipelines
 * `ingress/`  configurations for StackRox under popular Kubernetes ingress controllers
+* `completions/` shell auto-completions for roxctl
