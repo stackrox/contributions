@@ -15,8 +15,8 @@ spec:
       type: string
       description: Full name of image to scan (example -- gcr.io/rox/sample:5.0-rc1)
   results:
-      - name: check_output
-        description: Output of `roxctl image check`
+      - name: check_passed
+        description: Whether the task passed or failed, "true" for a pass, "false" for a fail.
   steps:
     - name: rox-image-check
       image: centos:8
@@ -36,4 +36,9 @@ spec:
         set +x
         curl -k -L -H "Authorization: Bearer $ROX_API_TOKEN" https://$ROX_CENTRAL_ENDPOINT/api/cli/download/roxctl-linux --output ./roxctl  > /dev/null; echo "Getting roxctl"
         chmod +x ./roxctl  > /dev/null
-        ./roxctl image check --insecure-skip-tls-verify -e $ROX_CENTRAL_ENDPOINT --image $(params.image) 
+        if ./roxctl image check --insecure-skip-tls-verify -e $ROX_CENTRAL_ENDPOINT --image $(params.image); then
+          echo -n "true" > $(results.check_passed.path)
+        else
+          echo -n "false" > $(results.check_passed.path)
+        fi
+        cd .
