@@ -11,9 +11,6 @@ This script uses roxctl to scan all images in all ecr image registries within an
 * `ROX_SECRET_TOKEN_LOCATION` - Location of secret value in AWS Secrets Manager containing the ROX_API_TOKEN string (see https://docs.openshift.com/acs/3.67/cli/getting-started-cli.html#cli-authentication_cli-getting-started for more detail on generating a token) 
 <<<<<<< HEAD
 * `AWS_REGION` - AWS region containing the ecr repositories you would like to scan
-=======
-*  `AWS_REGION` - AWS region containing the ecr repositories you would like to scan
->>>>>>> erictesting
 
 **Usage**
 `./ecr-scan-roxctl.sh`
