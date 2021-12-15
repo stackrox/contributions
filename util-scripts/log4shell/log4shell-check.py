@@ -2,7 +2,6 @@ import json
 import requests
 import os
 import pandas as pd
-from tabulate import tabulate
 import urllib3
 
 # disabling TLS certificate check
