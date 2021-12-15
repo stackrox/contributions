@@ -2,6 +2,7 @@ import json
 import requests
 import os
 import pandas as pd
+from tabulate import tabulate
 import urllib3
 
 urllib3.disable_warnings()
@@ -31,5 +32,5 @@ for affected_deployment in affected_deployments['deployments']:
     results[deployment_details['id']] = deployment
 
 results_table = pd.DataFrame.from_dict(data=results, orient='index')
-print(results_table.to_string(index=False))
+print(tabulate(results_table, headers=["Cluster", "Deployment Name", "Mitigation"], tablefmt='psql', showindex=False))
 
