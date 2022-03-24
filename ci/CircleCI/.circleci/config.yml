@@ -33,18 +33,41 @@ orbs:
           rox_central_endpoint:
             description: URL of Central (central.contoso.com:443 for example)
             type: string
-          rox_image_scan:
+          rox_image:
             description: Name of image to scan (neilcar/testimage:5 or registry.contoso.com/db_broker:latest for example)
             type: string
+          output_format:
+            description: Format of image scan output (table | csv | json) (default "json")
+            type: string
+            default: "json"
         steps:
           - rox-roxctl-install:
               rox_api_token: <<parameters.rox_api_token>>
               rox_central_endpoint: <<parameters.rox_central_endpoint>>
           - run: >-
-              ./roxctl image scan -e <<parameters.rox_central_endpoint>> --image <<parameters.rox_image_scan>> --format pretty
-              # --format switch requires roxctl 3.0.53.0 or later
+              ./roxctl image scan -e <<parameters.rox_central_endpoint>> --image <<parameters.rox_image>> --output <<parameters.output_format>>
+      rox-image-check:
+        machine: true
+        parameters:
+          rox_api_token:
+            description: API key with CI permissions
+            type: string
+          rox_central_endpoint:
+            description: URL of Central (central.contoso.com:443 for example)
+            type: string
+          rox_image:
+            description: Name of image to check (neilcar/testimage:5 or registry.contoso.com/db_broker:latest for example)
+            type: string
+          output_format:
+            description: Format of image scan output (table | csv | json | junit) (default "table")
+            type: string
+            default: "table"
+        steps:
+          - rox-roxctl-install:
+              rox_api_token: <<parameters.rox_api_token>>
+              rox_central_endpoint: <<parameters.rox_central_endpoint>>
           - run: >-
-              ./roxctl image check -e <<parameters.rox_central_endpoint>> --image <<parameters.rox_image_scan>>
+              ./roxctl image check -e <<parameters.rox_central_endpoint>> --image <<parameters.rox_image>> --output <<parameters.output_format>>
     commands:
       rox-roxctl-install:
         parameters:
@@ -68,7 +91,13 @@ workflows:
           name: scan an image
           rox_central_endpoint: $ROX_CENTRAL_ENDPOINT
           rox_api_token: $ROX_API_TOKEN
-          rox_image_scan: neilcar/jenkins-demo:latest
+          rox_image: neilcar/jenkins-demo:latest
+      - rox-orb/rox-image-check: 
+          context: rox
+          name: check an image against build-time policies
+          rox_central_endpoint: $ROX_CENTRAL_ENDPOINT
+          rox_api_token: $ROX_API_TOKEN
+          rox_image: neilcar/jenkins-demo:latest
       - rox-orb/rox-deployment-check: 
           context: rox
           name: Check deployment
