@@ -27,7 +27,7 @@ function curl_central() {
 # Collect all alerts
 cvss=7
 
-res="$(curl_central "v1/alerts?query=Policy%3AFixable%20CVSS%20%3E%3D%20${cvss}")"
+res="$(curl_central "v1/alerts?query=Policy%3AFixable%20Severity%20at%20least%20Important")"
 
 # Iterate over all deployments and get the full deployment
 for deployment_id in $(echo "${res}" | jq -r .alerts[].deployment.id); do
