@@ -27,7 +27,7 @@ function curl_central() {
 # Collect all alerts
 cvss=7
 
-res="$(curl_central "v1/alerts?query=Policy%3AFixable%20CVSS%20%3E%3D%20${cvss}")"
+res="$(curl_central "v1/alerts?query=Policy%3AFixable%20Severity%20at%20least%20Important")"
 
 # Iterate over all deployments and get the full deployment
 for deployment_id in $(echo "${res}" | jq -r .alerts[].deployment.id); do
@@ -55,7 +55,7 @@ for deployment_id in $(echo "${res}" | jq -r .alerts[].deployment.id); do
        export image_name
        
        # Format the CSV correctly
-       echo "${image_res}" | jq -r --argjson cvss "$cvss" '(.metadata.v1.layers as $layers | .scan.components | sort_by(.layerIndex, .name) | .[] | . as $component | select(.vulns != null) | .vulns[] | select(.cvss >= $cvss) | select(.fixedBy != null) | [ env.deployment_name, env.image_name, .cve, .cvss, .summary, $component.name, $component.version, .fixedBy, $component.layerIndex, ($layers[$component.layerIndex // 0].instruction + " " +$layers[$component.layerIndex // 0].value)]) | @csv' >> "${output_file}"
+       echo "${image_res}" | jq -r --argjson cvss "$cvss" 'try (.metadata.v1.layers as $layers | .scan.components | sort_by(.layerIndex, .name) | .[]? | . as $component | select(.vulns != null) | .vulns[] | select(.cvss >= $cvss) | select(.fixedBy != null) | [ env.deployment_name, env.image_name, .cve, .cvss, .summary, $component.name, $component.version, .fixedBy, $component.layerIndex, ($layers[$component.layerIndex // 0].instruction + " " +$layers[$component.layerIndex // 0].value)]) | @csv' >> "${output_file}"
      fi
    done
   done
