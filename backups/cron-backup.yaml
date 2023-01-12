@@ -1,0 +1,56 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-cron
+  namespace: stackrox
+spec:
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+            - args:
+                - -p
+                - $(ACS_ADMIN_PASSWORD)
+                - --output
+                - /mnt
+                - -e
+                - ###insert end point here or be professional and use a variable 
+                - --insecure-skip-tls-verify
+              command:
+                - roxctl
+                - central
+                - backup
+              env:  ###either retreieve the rox pass or create a token and store it in a secret the set the env, don't use passwords in Git!
+                - name: ACS_ADMIN_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: password
+                      name: acs-password
+              image: registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8:3.71.2
+              imagePullPolicy: IfNotPresent
+              name: backup-cron
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              volumeMounts:
+                - mountPath: /mnt
+                  name: stackrox-backups-uat
+          dnsPolicy: ClusterFirst
+          restartPolicy: OnFailure
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 30
+          volumes:
+            - name: stackrox-backups-uat
+              persistentVolumeClaim:
+                claimName: stackrox-backups-uat
+  schedule: 05 1 * * *
+  successfulJobsHistoryLimit: 3
+  suspend: false
