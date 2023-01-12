@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: retrieve-backups
+  namespace: stackrox
+spec:
+  containers:
+    - name: retrieve-backups
+      image: 'registry.access.redhat.com/ubi8/ubi'
+      volumeMounts:
+        - mountPath: /mnt
+          name: stackrox-backups
+      command: [ "/bin/bash", "-c", "--" ]
+      args: [ "while true; do sleep 30; done;" ]
+  volumes:
+    - name: stackrox-backups-uat
+      persistentVolumeClaim:
+        claimName: stackrox-backups-uat
