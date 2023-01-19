@@ -16,8 +16,6 @@ spec:
         spec:
           containers:
             - args:
-                - -p
-                - $(ACS_ADMIN_PASSWORD)
                 - --output
                 - /mnt
                 - -e
@@ -28,11 +26,11 @@ spec:
                 - central
                 - backup
               env:  ###either retreieve the rox pass or create a token and store it in a secret the set the env, don't use passwords in Git!
-                - name: ACS_ADMIN_PASSWORD
+                - name: ROX_API_TOKEN
                   valueFrom:
                     secretKeyRef:
-                      key: password
-                      name: acs-password
+                      key: token
+                      name: rox-api-token
               image: registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8:3.71.2
               imagePullPolicy: IfNotPresent
               name: backup-cron
