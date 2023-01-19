@@ -9,7 +9,7 @@ spec:
       image: 'registry.access.redhat.com/ubi8/ubi'
       volumeMounts:
         - mountPath: /mnt
-          name: stackrox-backups
+          name: stackrox-backups-uat
       command: [ "/bin/bash", "-c", "--" ]
       args: [ "while true; do sleep 30; done;" ]
   volumes:
