@@ -1,0 +1,44 @@
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: clean-backup-cron
+  namespace: stackrox
+spec:
+  schedule: 10 1 * * *
+  concurrencyPolicy: Allow
+  suspend: false
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          volumes:
+            - name: stackrox-backups-uat
+              persistentVolumeClaim:
+                claimName: stackrox-backups-uat
+          containers:
+            - name: clean-backup-cron
+              image: registry.access.redhat.com/ubi8/ubi
+              args:
+                - /bin/sh
+                - '-c'
+                - 'find /mnt* -mtime +30 -exec rm {} \;'
+              resources: {}
+              volumeMounts:
+                - name: stackrox-backups-uat
+                  mountPath: /mnt
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              imagePullPolicy: IfNotPresent
+          restartPolicy: OnFailure
+          terminationGracePeriodSeconds: 30
+          dnsPolicy: ClusterFirst
+          securityContext: {}
+          schedulerName: default-scheduler
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+status: {}
+
