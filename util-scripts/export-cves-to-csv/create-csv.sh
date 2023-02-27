@@ -29,8 +29,6 @@ else
   exit 1
 fi
 
-exit 0
-
 function curl_central() {
   curl -sk -H "Authorization: Bearer ${ROX_API_TOKEN}" "https://${ROX_ENDPOINT}/$1"
 }
