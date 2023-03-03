@@ -29,7 +29,7 @@ function setup () {  # setup role and token
     echo -e "\n----------------------------------------------------------------------------------"
 }
 
-echo -e "\n StackRox Complaince Automation Script"
+echo -e "\n StackRox Compliance Automation Script"
 echo " - Inputs: ./stackrox_compliance_scan.sh <SERVER NAME>"
 echo " - Outputs: <SERVERNAME>_<CLUSTERNAME>_<STANDARD>_Results_$(date +"%m-%d-%y").json"
 echo -e "----------------------------------------------------------------------------------\n"
