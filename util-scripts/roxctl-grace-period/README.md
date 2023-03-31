@@ -2,7 +2,7 @@ Parses results from "roxctl image scan" to determine which fixable CVEs fall int
 
 Output lists each Fixable CVE as
 - "in grace": CVE Published less than "grace period" days ago 
-- "in grace": CVE Published more than "grace period" days ago 
+- "out of grace": CVE Published more than "grace period" days ago 
 
 Usage:
 
