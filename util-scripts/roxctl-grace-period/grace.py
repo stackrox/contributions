@@ -9,7 +9,7 @@ currentTime=datetime.now()
 
 image_json = json.load(sys.stdin)
 
-#print(image_json["scan"]["components"][0])
+returnCode=0
 
 for component in image_json["scan"]["components"]:
     try:
@@ -19,6 +19,7 @@ for component in image_json["scan"]["components"]:
                     pubTimestamp = datetime.strptime(vuln["publishedOn"][0:10], "%Y-%m-%d")
                     if (currentTime - timedelta(days=gracePeriod)) > pubTimestamp:
                         print ("out of grace: ", component["name"], vuln["cve"], vuln["severity"], vuln["fixedBy"], vuln["publishedOn"])
+                        returnCode=1
                     else:
                         print ("in grace: ", component["name"], vuln["cve"], vuln["severity"], vuln["fixedBy"], vuln["publishedOn"])
                     #print (vuln["cve"])
@@ -26,3 +27,5 @@ for component in image_json["scan"]["components"]:
                 pass
     except KeyError:
         pass
+
+exit(returnCode)
