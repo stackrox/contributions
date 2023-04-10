@@ -22,7 +22,6 @@ for component in image_json["scan"]["components"]:
                         returnCode=1
                     else:
                         print ("in grace: ", component["name"], vuln["cve"], vuln["severity"], vuln["fixedBy"], vuln["publishedOn"])
-                    #print (vuln["cve"])
             except KeyError:
                 pass
     except KeyError:
