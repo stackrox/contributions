@@ -8,3 +8,6 @@ Usage:
 
 `roxctl image scan -e $CENTRAL:443 --image quay.io/example:1.0 | ./grace.py
 `
+
+Notes:
+- Also works with the JSON returned from GET /v1/images/{id} in ACS API.
