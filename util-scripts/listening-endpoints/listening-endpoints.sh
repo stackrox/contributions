@@ -17,7 +17,7 @@ namespace_value=NA
 clustername_value=NA
 clusterid_value=NA
 format_value=table
-display_node_value=false
+display_node_value="false"
 
 process_arg() {
     arg=$1
@@ -119,14 +119,14 @@ get_listening_endpoints_for_json() {
         if [[ "$listening_endpoints" != "" ]]; then
             nlistening_endpoints="$(echo $listening_endpoints | jq '.listeningEndpoints | length')"
     	    if [[ "$nlistening_endpoints" > 0 ]]; then
+		if [[ "$display_node_value" == "true" ]]; then
+		    for ((j = 0; j < nlistening_endpoints; j = j + 1)); do
+		        listening_endpoint="$(echo $listening_endpoints | jq -r .listeningEndpoints[$j])"
+		        node="$(get_node "$listening_endpoint")"
+		        listening_endpoints="$(echo "$listening_endpoints" | jq ".listeningEndpoints[$j].node = \"$node\"")"
+                    done
+                fi
                 echo "deployment= $deployment"
-                echo $listening_endpoints | jq
-		for ((j = 0; j < nlistening_endpoints; j = j + 1)); do
-		    listening_endpoint="$(echo $listening_endpoints | jq -r .listeningEndpoints[$j])"
-		    node="$(get_node "$listening_endpoint")"
-		    listening_endpoints="$(echo "$listening_endpoints" | jq ".listeningEndpoints[$j].node = \"$node\"")"
-
-                done
                 echo $listening_endpoints | jq
                 echo
     	    fi
@@ -163,7 +163,7 @@ get_listening_endpoints_for_table() {
 
                 table_line=$(printf "%-20s %-9s %-7s %-7s %-15s %-40s %-55s %-20s" \
                     "$name" "$pid" "$plop_port" "$proto" "$namespace" "$clusterId" \
-                    "$podId" "$containerName" "$node")
+                    "$podId" "$containerName")
 
 		if [[ "$display_node_value" == "true" ]]; then
                     node="$(get_node "$listening_endpoint")"
