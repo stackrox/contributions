@@ -17,6 +17,7 @@ namespace_value=NA
 clustername_value=NA
 clusterid_value=NA
 format_value=table
+display_node_value=false
 
 process_arg() {
     arg=$1
@@ -36,6 +37,8 @@ process_arg() {
 	clusterid_value="$value"
     elif [[ "$key" == "format" ]]; then
 	format_value="$value"
+    elif [[ "$key" == "display_node" ]]; then
+        display_node_value="$value"
     fi
 }
 
@@ -45,84 +48,157 @@ process_args() {
      done
 }
 
-process_args $@
+create_pod_node_map() {
 
-if [[ "$deployment_value" == "NA" ]]; then
-    json_deployments="$(curl --location --silent --request GET "https://${ROX_ENDPOINT}/v1/deployments" -k -H "Authorization: Bearer $ROX_API_TOKEN")"
+    local pods_response="$(curl --location --silent --request GET "https://${ROX_ENDPOINT}/v1/pods" -k --header "Authorization: Bearer $ROX_API_TOKEN")"
 
-    if [[ "$namespace_value" != "NA" ]]; then
-	json_deployments="$(echo "$json_deployments" | jq --arg namespace "$namespace_value" '{deployments: [.deployments[] | select(.namespace == $namespace)]}')"
-    fi
+    # Parse the JSON response using jq and loop through the pods
+    for pod in $(echo "$pods_response" | jq -r '.pods[] | @base64'); do
+        local pod_json="$(echo "$pod" | base64 --decode)"  # decode base64 pod JSON
 
-    if [[ "$deploymentname_value" != "NA" ]]; then
-	json_deployments="$(echo "$json_deployments" | jq --arg deploymentname "$deploymentname_value" '{deployments: [.deployments[] | select(.name == $deploymentname)]}')"
-    fi
+        # Extract pod ID and node from the pod JSON
+        local pod_id="$(echo "$pod_json" | jq -r '.id')"
+	pod_id_key="$(echo "$pod_id" | tr -d "-")"
+	local live_instances="$(echo "$pod_json" | jq -r '.liveInstances')"
+        if [[ "$live_instances" != "null" ]]; then
+	    node="$(echo "$live_instances" | jq -r '.[0].instanceId.node')"
 
-    if [[ "$clustername_value" != "NA" ]]; then
-	json_deployments="$(echo "$json_deployments" | jq --arg clustername "$clustername_value" '{deployments: [.deployments[] | select(.cluster == $clustername)]}')"
-    fi
-    
-    if [[ "$clusterid_value" != "NA" ]]; then
-	json_deployments="$(echo "$json_deployments" | jq --arg clusterid "$clusterid_value" '{deployments: [.deployments[] | select(.clusterId == $clusterid)]}')"
-    fi
-
-    ndeployment="$(echo $json_deployments | jq '.deployments | length')"
-    deployments=()
-    for ((i = 0; i < ndeployment; i = i + 1)); do
-        deployments+=("$(echo "$json_deployments" | jq .deployments[$i].id | tr -d '"')")
+            # Add pod ID and node to the associative array
+            pod_node_map["$pod_id_key"]=$node
+        fi
     done
-else
-    deployments=($deployment_value)
-fi
+}
 
+get_deployments() {
+    if [[ "$deployment_value" == "NA" ]]; then
+        json_deployments="$(curl --location --silent --request GET "https://${ROX_ENDPOINT}/v1/deployments" -k -H "Authorization: Bearer $ROX_API_TOKEN")"
+    
+        if [[ "$namespace_value" != "NA" ]]; then
+    	json_deployments="$(echo "$json_deployments" | jq --arg namespace "$namespace_value" '{deployments: [.deployments[] | select(.namespace == $namespace)]}')"
+        fi
+    
+        if [[ "$deploymentname_value" != "NA" ]]; then
+    	json_deployments="$(echo "$json_deployments" | jq --arg deploymentname "$deploymentname_value" '{deployments: [.deployments[] | select(.name == $deploymentname)]}')"
+        fi
+    
+        if [[ "$clustername_value" != "NA" ]]; then
+    	json_deployments="$(echo "$json_deployments" | jq --arg clustername "$clustername_value" '{deployments: [.deployments[] | select(.cluster == $clustername)]}')"
+        fi
+        
+        if [[ "$clusterid_value" != "NA" ]]; then
+    	json_deployments="$(echo "$json_deployments" | jq --arg clusterid "$clusterid_value" '{deployments: [.deployments[] | select(.clusterId == $clusterid)]}')"
+        fi
+    
+        ndeployment="$(echo $json_deployments | jq '.deployments | length')"
+        deployments=()
+        for ((i = 0; i < ndeployment; i = i + 1)); do
+            deployments+=("$(echo "$json_deployments" | jq .deployments[$i].id | tr -d '"')")
+        done
+    else
+        deployments=($deployment_value)
+    fi
+}
 
-netstat_lines=""
+get_node() {
+    local listening_endpoint="$1"
 
-for deployment in ${deployments[@]}; do
-    listening_endpoints="$(curl --location --silent --request GET "https://${ROX_ENDPOINT}/v1/listening_endpoints/deployment/$deployment" -k --header "Authorization: Bearer $ROX_API_TOKEN")" || true
-    if [[ "$listening_endpoints" != "" ]]; then
-        nlistening_endpoints="$(echo $listening_endpoints | jq '.listeningEndpoints | length')"
-	if [[ "$nlistening_endpoints" > 0 ]]; then
-	    if [[ "$format_value" == "json" ]]; then
+    podUid="$(echo $listening_endpoint | jq -r .podUid)"
+    if [[ -n "$podUid" ]]; then
+        pod_id_key="$(echo "$podUid" | tr -d "-")"
+        node=${pod_node_map[$pod_id_key]}
+    else
+        node=""
+    fi
+
+    echo "$node"
+}
+
+get_listening_endpoints_for_json() {
+    for deployment in ${deployments[@]}; do
+        listening_endpoints="$(curl --location --silent --request GET "https://${ROX_ENDPOINT}/v1/listening_endpoints/deployment/$deployment" -k --header "Authorization: Bearer $ROX_API_TOKEN")" || true
+        if [[ "$listening_endpoints" != "" ]]; then
+            nlistening_endpoints="$(echo $listening_endpoints | jq '.listeningEndpoints | length')"
+    	    if [[ "$nlistening_endpoints" > 0 ]]; then
                 echo "deployment= $deployment"
                 echo $listening_endpoints | jq
+		for ((j = 0; j < nlistening_endpoints; j = j + 1)); do
+		    listening_endpoint="$(echo $listening_endpoints | jq -r .listeningEndpoints[$j])"
+		    node="$(get_node "$listening_endpoint")"
+		    listening_endpoints="$(echo "$listening_endpoints" | jq ".listeningEndpoints[$j].node = \"$node\"")"
+
+                done
+                echo $listening_endpoints | jq
                 echo
-            fi	
-	fi
+    	    fi
+        fi
+    done
+}
 
-        for ((j = 0; j < nlistening_endpoints; j = j + 1)); do
-            l4_proto="$(echo $listening_endpoints | jq .listeningEndpoints[$j].endpoint.protocol | tr -d '"')"
-            if [[ "$l4_proto" == L4_PROTOCOL_TCP ]]; then
-                proto=tcp
-            elif [[ "$l4_proto" == L4_PROTOCOL_UDP ]]; then
-                proto=udp
-            else
-               proto=unkown
-            fi
+get_listening_endpoints_for_table() {
+    table_lines=""
+    
+    for deployment in ${deployments[@]}; do
+        listening_endpoints="$(curl --location --silent --request GET "https://${ROX_ENDPOINT}/v1/listening_endpoints/deployment/$deployment" -k --header "Authorization: Bearer $ROX_API_TOKEN")" || true
+        if [[ "$listening_endpoints" != "" ]]; then
+            nlistening_endpoints="$(echo $listening_endpoints | jq '.listeningEndpoints | length')"
+    
+            for ((j = 0; j < nlistening_endpoints; j = j + 1)); do
+                l4_proto="$(echo $listening_endpoints | jq -r .listeningEndpoints[$j].endpoint.protocol)"
+                if [[ "$l4_proto" == L4_PROTOCOL_TCP ]]; then
+                    proto=tcp
+                elif [[ "$l4_proto" == L4_PROTOCOL_UDP ]]; then
+                    proto=udp
+                else
+                    proto=unkown
+                fi
+    
+                listening_endpoint="$(echo $listening_endpoints | jq -r .listeningEndpoints[$j])"
+                name="$(echo $listening_endpoint | jq -r .signal.name)"
+                plop_port="$(echo $listening_endpoint | jq -r .endpoint.port)"
+                namespace="$(echo $listening_endpoint | jq -r .namespace)"
+                clusterId="$(echo $listening_endpoint | jq -r .clusterId)"
+                podId="$(echo $listening_endpoint | jq -r .podId)"
+                containerName="$(echo $listening_endpoint | jq -r .containerName)"
+                pid="$(echo $listening_endpoint | jq -r .signal.pid)"
 
-            name="$(echo $listening_endpoints | jq .listeningEndpoints[$j].signal.name | tr -d '"')"
-            plop_port="$(echo $listening_endpoints | jq .listeningEndpoints[$j].endpoint.port | tr -d '"')"
-            namespace="$(echo $listening_endpoints | jq .listeningEndpoints[$j].namespace | tr -d '"')"
-            clusterId="$(echo $listening_endpoints | jq .listeningEndpoints[$j].clusterId | tr -d '"')"
-            podId="$(echo $listening_endpoints | jq .listeningEndpoints[$j].podId | tr -d '"')"
-            containerName="$(echo $listening_endpoints | jq .listeningEndpoints[$j].containerName | tr -d '"')"
-            pid="$(echo $listening_endpoints | jq .listeningEndpoints[$j].signal.pid | tr -d '"')"
+                table_line=$(printf "%-20s %-9s %-7s %-7s %-15s %-40s %-55s %-20s" \
+                    "$name" "$pid" "$plop_port" "$proto" "$namespace" "$clusterId" \
+                    "$podId" "$containerName" "$node")
 
-            netstat_line=$(printf "%-20s %-9s %-7s %-7s %-15s %-40s %-55s %-20s" \
-                "$name" "$pid" "$plop_port" "$proto" "$namespace" "$clusterId" \
-                "$podId" "$containerName")
-
-            netstat_lines="${netstat_lines}${netstat_line}\n"
-        done
-    fi
-done
-
-echo
-if [[ "$format_value" == "table" ]]; then
-    header=$(printf "%-20s %-9s %-7s %-7s %-15s %-40s %-55s %-20s\n" \
+		if [[ "$display_node_value" == "true" ]]; then
+                    node="$(get_node "$listening_endpoint")"
+		    table_line="${table_line} $node"
+                fi
+                    	
+    
+                table_lines="${table_lines}${table_line}\n"
+            done
+        fi
+    done
+    
+    echo
+    header=$(printf "%-20s %-9s %-7s %-7s %-15s %-40s %-55s %-20s" \
         "Program name" "PID" "Port" "Proto" "Namespace" "clusterId" \
         "podId" "containerName")
 
+
+    if [[ "$display_node_value" == "true" ]]; then
+        header="${header} node"
+    fi
+
     echo -e "$header"
-    echo -e "$netstat_lines"
+    echo -e "$table_lines"
+
+}
+
+process_args $@
+
+get_deployments
+declare -A pod_node_map  # associative array to store pod ID as key and node as value
+create_pod_node_map
+if [[ "$format_value" == "json" ]]; then
+    get_listening_endpoints_for_json
+else
+    get_listening_endpoints_for_table
 fi
+
