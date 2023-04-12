@@ -18,6 +18,7 @@ clustername_value=NA
 clusterid_value=NA
 format_value=table
 display_node_value="false"
+control_plane_value=NA
 
 process_arg() {
     arg=$1
@@ -39,6 +40,8 @@ process_arg() {
 	format_value="$value"
     elif [[ "$key" == "display_node" ]]; then
         display_node_value="$value"
+    elif [[ "$key" == "control_plane" ]]; then
+        control_plane_value="$value"
     fi
 }
 
@@ -74,19 +77,28 @@ get_deployments() {
         json_deployments="$(curl --location --silent --request GET "https://${ROX_ENDPOINT}/v1/deployments" -k -H "Authorization: Bearer $ROX_API_TOKEN")"
     
         if [[ "$namespace_value" != "NA" ]]; then
-    	json_deployments="$(echo "$json_deployments" | jq --arg namespace "$namespace_value" '{deployments: [.deployments[] | select(.namespace == $namespace)]}')"
+    	    json_deployments="$(echo "$json_deployments" | jq --arg namespace "$namespace_value" '{deployments: [.deployments[] | select(.namespace == $namespace)]}')"
+        fi
+
+        if [[ "$control_plane_value" == "control_plane_only" ]]; then
+	    json_deployments="$(echo "$json_deployments" | jq '{deployments: [.deployments[] | select(.namespace == "kube-node-lease" or .namespace == "kube-public" or .namespace == "kube-system")]}')"
+        fi
+
+        if [[ "$control_plane_value" == "without_control_plane" ]]; then
+    	    #json_deployments="$(echo "$json_deployments" | jq '{deployments: [.deployments[] | select(.namespace != kube-node-lease && .namespace != kube-public && .namespace != kube-system)]}')"
+	    json_deployments="$(echo "$json_deployments" | jq '{deployments: [.deployments[] | select(.namespace != "kube-node-lease" and .namespace != "kube-public" and .namespace != "kube-system")]}')"
         fi
     
         if [[ "$deploymentname_value" != "NA" ]]; then
-    	json_deployments="$(echo "$json_deployments" | jq --arg deploymentname "$deploymentname_value" '{deployments: [.deployments[] | select(.name == $deploymentname)]}')"
+    	    json_deployments="$(echo "$json_deployments" | jq --arg deploymentname "$deploymentname_value" '{deployments: [.deployments[] | select(.name == $deploymentname)]}')"
         fi
     
         if [[ "$clustername_value" != "NA" ]]; then
-    	json_deployments="$(echo "$json_deployments" | jq --arg clustername "$clustername_value" '{deployments: [.deployments[] | select(.cluster == $clustername)]}')"
+    	    json_deployments="$(echo "$json_deployments" | jq --arg clustername "$clustername_value" '{deployments: [.deployments[] | select(.cluster == $clustername)]}')"
         fi
         
         if [[ "$clusterid_value" != "NA" ]]; then
-    	json_deployments="$(echo "$json_deployments" | jq --arg clusterid "$clusterid_value" '{deployments: [.deployments[] | select(.clusterId == $clusterid)]}')"
+    	    json_deployments="$(echo "$json_deployments" | jq --arg clusterid "$clusterid_value" '{deployments: [.deployments[] | select(.clusterId == $clusterid)]}')"
         fi
     
         ndeployment="$(echo $json_deployments | jq '.deployments | length')"
