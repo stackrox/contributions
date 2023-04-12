@@ -85,7 +85,6 @@ get_deployments() {
         fi
 
         if [[ "$control_plane_value" == "without_control_plane" ]]; then
-    	    #json_deployments="$(echo "$json_deployments" | jq '{deployments: [.deployments[] | select(.namespace != kube-node-lease && .namespace != kube-public && .namespace != kube-system)]}')"
 	    json_deployments="$(echo "$json_deployments" | jq '{deployments: [.deployments[] | select(.namespace != "kube-node-lease" and .namespace != "kube-public" and .namespace != "kube-system")]}')"
         fi
     
