@@ -1,10 +1,10 @@
 {
     "policies": [
         {
-            "name": "PolKit in Image",
-            "description": "Alert on deployments with PolKit present",
-            "rationale": "Leaving privilege escalation tools like PolKit in an image potentially allows attackers to escalate privileges within the container.",
-            "remediation": "Use your package manager's \"remove\" command to remove PolKit from the image build for production containers.",
+            "name": "Polkit in Image",
+            "description": "Alert on deployments with Polkit present",
+            "rationale": "Leaving privileged administration tools like Polkit in an image potentially allows attackers to escalate privileges within the container.",
+            "remediation": "Use your package manager's \"remove\" command to remove polkit packages from the image build for production containers.",
             "disabled": false,
             "categories": [
                 "Security Best Practices"
