@@ -101,7 +101,6 @@ get_deployments() {
         fi
     
         ndeployment="$(echo $json_deployments | jq '.deployments | length')"
-        deployments=()
         for ((i = 0; i < ndeployment; i = i + 1)); do
             deployments+=("$(echo "$json_deployments" | jq .deployments[$i].id | tr -d '"')")
         done
@@ -204,6 +203,7 @@ get_listening_endpoints_for_table() {
 
 process_args $@
 
+deployments=()
 get_deployments
 declare -A pod_node_map  # associative array to store pod ID as key and node as value
 create_pod_node_map
