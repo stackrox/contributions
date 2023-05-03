@@ -1,4 +1,4 @@
-Parses results from "roxctl image scan" to find the lowest-numbered ("base") image and determine its age
+Parses results from "roxctl image scan" to find the lowest-numbered ("base") layer and determine its age
 
 Output provides age of base image, in days
 
