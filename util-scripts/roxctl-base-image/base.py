@@ -15,7 +15,7 @@ try:
         print ("created: ", created)
         createdDate = datetime.strptime(created[0:10], "%Y-%m-%d")
         timeDiff = currentTime - createdDate
-        print ("base image is ", timeDiff.days, " old")
+        print ("base image is", timeDiff.days, "days old")
 except KeyError:
     print ("base image layer not found")
     pass
