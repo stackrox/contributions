@@ -1,0 +1,54 @@
+{
+    "policies": [
+        {
+            "name": "Polkit in Image",
+            "description": "Alert on deployments with Polkit present",
+            "rationale": "Leaving privileged administration tools like Polkit in an image potentially allows attackers to escalate privileges within the container.",
+            "remediation": "Use your package manager's \"remove\" command to remove polkit packages from the image build for production containers.",
+            "disabled": false,
+            "categories": [
+                "Security Best Practices"
+            ],
+            "fields": null,
+            "lifecycleStages": [
+                "BUILD",
+                "DEPLOY"
+            ],
+            "eventSource": "NOT_APPLICABLE",
+            "whitelists": [],
+            "exclusions": [],
+            "scope": [],
+            "severity": "LOW_SEVERITY",
+            "enforcementActions": [],
+            "notifiers": [],
+            "SORTName": "",
+            "SORTLifecycleStage": "",
+            "SORTEnforcement": false,
+            "policyVersion": "1.1",
+            "policySections": [
+                {
+                    "sectionName": "",
+                    "policyGroups": [
+                        {
+                            "fieldName": "Image Component",
+                            "booleanOperator": "OR",
+                            "negate": false,
+                            "values": [
+                                {
+                                    "value": "polkit="
+                                },
+                                {
+                                    "value": "policykit-1="
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "mitreAttackVectors": [],
+            "criteriaLocked": false,
+            "mitreVectorsLocked": false,
+            "isDefault": false
+        }
+    ]
+}

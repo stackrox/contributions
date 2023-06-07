@@ -1,0 +1,48 @@
+{
+    "policies": [
+        {
+            "name": "Polkit Execution Detected",
+            "description": "Detects execution of the pkexec binary in a container",
+            "rationale": "Polkit can be abused by attackers to elevate privileges within a container.",
+            "remediation": "Use your package manager's \"remove\" command to remove polkit packages from the image build for production containers.",
+            "disabled": false,
+            "categories": [
+                "Security Best Practices"
+            ],
+            "lifecycleStages": [
+                "RUNTIME"
+            ],
+            "eventSource": "DEPLOYMENT_EVENT",
+            "exclusions": [],
+            "scope": [],
+            "severity": "MEDIUM_SEVERITY",
+            "enforcementActions": [],
+            "notifiers": [],
+            "SORTName": "Polkit Execution Detected",
+            "SORTLifecycleStage": "RUNTIME",
+            "SORTEnforcement": false,
+            "policyVersion": "1.1",
+            "policySections": [
+                {
+                    "sectionName": "",
+                    "policyGroups": [
+                        {
+                            "fieldName": "Process Name",
+                            "booleanOperator": "OR",
+                            "negate": false,
+                            "values": [
+                                {
+                                    "value": "pkexec"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "mitreAttackVectors": [],
+            "criteriaLocked": true,
+            "mitreVectorsLocked": true,
+            "isDefault": false
+        }
+    ]
+}
