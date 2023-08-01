@@ -16,11 +16,11 @@ spec:
             image: quay.io/openshift/origin-cli:4.12
             resources: {}
             command:
-            - /opt/scripts/fetchvulns.zh 1
-            volumeMounts: 2
+            - /opt/scripts/fetchvulns.zh 
+            volumeMounts: 
             - name: scripts
               mountPath: /opt
-          volumes: 3
+          volumes: 
           - name: scripts
             configMap:
               name: vulnfetcher
