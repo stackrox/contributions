@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: fetch-vuln-definitions
+  namespace: stackrox
+spec:
+  schedule: */4 * * * *
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          containers:
+          - name: vuln-fetcher
+            image: quay.io/openshift/origin-cli:4.12
+            resources: {}
+            command:
+            - /opt/scripts/fetchvulns.zh 1
+            volumeMounts: 2
+            - name: scripts
+              mountPath: /opt
+          volumes: 3
+          - name: scripts
+            configMap:
+              name: vulnfetcher
+              defaultMode: 0555

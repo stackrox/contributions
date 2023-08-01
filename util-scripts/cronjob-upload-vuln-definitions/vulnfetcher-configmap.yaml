@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vulnfetcher
+  namespace: stackrox
+  app: roxctl
+data:
+  fetchvulns.sh: |
+    #!/bin/bash
+    curl https://install.stackrox.io/scanner/scanner-vuln-updates.zip --output vulns.zip
+    tar -xvf vulns.zip
+    export ROX_API_TOKEN=<insert-token-here>
+    export ROX_CENTRAL_ADDRESS=<insert-central-address-with-port>
+    roxctl scanner upload-db \
+    -e "$ROX_CENTRAL_ADDRESS" \
+    --scanner-db-file=scanner-defs.zip
