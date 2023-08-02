@@ -4,23 +4,26 @@ metadata:
   name: fetch-vuln-definitions
   namespace: stackrox
 spec:
-  schedule: */4 * * * *
+  schedule: "*/1 * * * *"
   jobTemplate:
     spec:
       template:
         spec:
+          securityContext:
+            runAsUser: 0
           dnsPolicy: ClusterFirst
+          serviceAccountName: vuln-loader
           restartPolicy: Never
           containers:
           - name: vuln-fetcher
-            image: quay.io/openshift/origin-cli:4.12
+            image: registry.access.redhat.com/ubi8/ubi:8.6
             resources: {}
             command:
-            - /opt/scripts/fetchvulns.zh 
+            - /opt/fetchvulns.sh
             volumeMounts: 
             - name: scripts
               mountPath: /opt
-          volumes: 
+          volumes:
           - name: scripts
             configMap:
               name: vulnfetcher

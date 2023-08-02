@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vulnfetcher
+  namespace: stackrox
+data:
+  fetchvulns.sh: |
+    #!/bin/bash
+    curl https://install.stackrox.io/scanner/scanner-vuln-updates.zip --output vulns.zip
+    export ROX_API_TOKEN=eyJhbGciOiJSUzI1NiIsImtpZCI6Imp3dGswIiwidHlwIjoiSldUIn0.eyJhdWQiOlsiaHR0cHM6Ly9zdGFja3JveC5pby9qd3Qtc291cmNlcyNhcGktdG9rZW5zIl0sImV4cCI6MTcyMjQ3MjQ2MCwiaWF0IjoxNjkwOTM2NDYwLCJpc3MiOiJodHRwczovL3N0YWNrcm94LmlvL2p3dCIsImp0aSI6IjhiMDVmZTM5LTEyMjEtNGZhYS1hNTY1LTc1YzVmMjk5ZjVkZCIsIm5hbWUiOiJ0ZXN0Iiwicm9sZXMiOlsiQWRtaW4iXX0.iqJecBFAaYDmy4Ek1u1tSl1_EU-PGR2jYRSNtZZ0l9D9tTTFbztwhzLE7PkgvVATlVXmBWPD2MZ4hVLpuFohRRk621gdyxWEqf679tM4u8bRjcC_IiFjn8uMcTok9tsPvibhqnAl70N9sLsRx4Je_igaIrQTw5ZfpzGXmjvClLDGmH3Yo0egbPqfmARDC0E9Q16S11PzfPOrQKhLeFTgJycW1Sxdura3wj6ezmBw-8FvbIBeBAMRk7Z6jM8sIwnpHHVJ7NqE1Q1RITti0Yy5sChhYYQTbU7BjbgpSM2bRoaBtkRrSghqxqIDLjRU1SiGiYiBTD5R6SP6qwi2T0VUSavzpFKrMAhbDafeHhrZzjbbEyupZVMZbvK8rgWQ_OIrhg1MeeiKEtLOkh3wW7A7euEQN-4bW5wZJJAi3nypY8k1jELkAmrpQ3nLfBolTovqHxmtjsd2Qmp8Yq-DOWFV1vvxGXeG6_9su9QbdI4iHxc3IAdoOleT581wYXwfVtk3HfzJGzY0as6NuHPz3pTAwlHv52pPb6_NHeFMNZRksZXanoFiwF2NIiNK2UYnNC7GWpXK-yItgGo0KU3MKDux5GK1RBG1V19at_UPQuwc8b-CRt6X-VeoEy-Y9oxRqPrjGzZsNyHIbIBFyyUPKncArxVHOb9cBpWgHh_MYuQ6U20 \
+    export ROX_CENTRAL_ADDRESS=central-stackrox.apps.eb-06-01-icky-oranges-perfec.openshift.infra.rox.systems:443
+    curl -O https://mirror.openshift.com/pub/rhacs/assets/4.1.2/bin/Linux/roxctl
+    chmod +x roxctl
+    ./roxctl scanner upload-db -e "$ROX_CENTRAL_ADDRESS" --insecure-skip-tls-verify --scanner-db-file=vulns.zip
