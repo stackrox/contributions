@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vulnfetcher
+  namespace: stackrox
+data:
+  fetchvulns.sh: |
+    #!/bin/bash
+    curl https://install.stackrox.io/scanner/scanner-vuln-updates.zip --output vulns.zip
+    export ROX_API_TOKEN=<insert-your-central-API-token-here>
+    export ROX_CENTRAL_ADDRESS=<insert-central-address:443>
+    curl -O https://mirror.openshift.com/pub/rhacs/assets/4.1.2/bin/Linux/roxctl
+    chmod +x roxctl
+    ./roxctl scanner upload-db -e "$ROX_CENTRAL_ADDRESS" --insecure-skip-tls-verify --scanner-db-file=vulns.zip
