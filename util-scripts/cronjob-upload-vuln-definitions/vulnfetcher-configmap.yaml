@@ -9,6 +9,8 @@ data:
     #!/bin/bash
     curl https://install.stackrox.io/scanner/scanner-vuln-updates.zip --output vulns.zip
     tar -xvf vulns.zip
+    curl -O https://mirror.openshift.com/pub/rhacs/assets/4.1.2/bin/Linux/roxctl
+    chmod +x roxctl
     export ROX_API_TOKEN=<insert-token-here>
     export ROX_CENTRAL_ADDRESS=<insert-central-address-with-port>
     roxctl scanner upload-db \
