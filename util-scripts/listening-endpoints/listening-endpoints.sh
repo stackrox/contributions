@@ -188,7 +188,7 @@ get_listening_endpoints_for_table() {
     
     echo
     header=$(printf "%-20s %-9s %-7s %-7s %-15s %-40s %-55s %-20s" \
-        "Program name" "PID" "Port" "Proto" "Namespace" "clusterId" \
+        "Process name" "PID" "Port" "Proto" "Namespace" "clusterId" \
         "podId" "containerName")
 
 
