@@ -164,6 +164,7 @@ get_listening_endpoints_for_table() {
     
                 listening_endpoint="$(echo $listening_endpoints | jq -r .listeningEndpoints[$j])"
                 name="$(echo $listening_endpoint | jq -r .signal.name)"
+                exec_file_path="$(echo $listening_endpoint | jq -r .signal.execFilePath)"
                 plop_port="$(echo $listening_endpoint | jq -r .endpoint.port)"
                 namespace="$(echo $listening_endpoint | jq -r .namespace)"
                 clusterId="$(echo $listening_endpoint | jq -r .clusterId)"
@@ -171,8 +172,8 @@ get_listening_endpoints_for_table() {
                 containerName="$(echo $listening_endpoint | jq -r .containerName)"
                 pid="$(echo $listening_endpoint | jq -r .signal.pid)"
 
-                table_line=$(printf "%-20s %-9s %-7s %-7s %-15s %-40s %-55s %-20s" \
-                    "$name" "$pid" "$plop_port" "$proto" "$namespace" "$clusterId" \
+                table_line=$(printf "%-40s %-9s %-7s %-7s %-15s %-40s %-55s %-20s" \
+                    "$exec_file_path" "$pid" "$plop_port" "$proto" "$namespace" "$clusterId" \
                     "$podId" "$containerName")
 
 		if [[ "$display_node_value" == "true" ]]; then
@@ -187,8 +188,8 @@ get_listening_endpoints_for_table() {
     done
     
     echo
-    header=$(printf "%-20s %-9s %-7s %-7s %-15s %-40s %-55s %-20s" \
-        "Process name" "PID" "Port" "Proto" "Namespace" "clusterId" \
+    header=$(printf "%-40s %-9s %-7s %-7s %-15s %-40s %-55s %-20s" \
+        "Exec file path" "PID" "Port" "Proto" "Namespace" "clusterId" \
         "podId" "containerName")
 
 
