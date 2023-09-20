@@ -18,7 +18,7 @@ if [[ -z "$1" ]]; then
 fi
 
 output_file="$1"
-echo '"Policy", "Description", "Severity", "Cluster", "Namespace", "Deployment", "Time", "Enforcement Count", "Enforcement Action"' > "${output_file}"
+echo '"Policy", "Description", "Severity", "Cluster", "Namespace", "Resource Type", "Resource Name", "Time", "Enforcement Count", "Enforcement Action"' > "${output_file}"
 
 function curl_central() {
   curl -sk -H "Authorization: Bearer ${ROX_API_TOKEN}" "https://${ROX_ENDPOINT}/$1"
@@ -41,5 +41,5 @@ echo $res | jq -c -r '.alerts[]' | while IFS= read alert; do
   echo "====="
   echo $alert
   echo "====="
-  echo "${alert}" | jq -r '[.policy.name, .policy.description, .policy.severity, .deployment.clusterName, .deployment.namespace, .deployment.name, .time, .enforcementCount, .enforcementAction] | @csv' >> "${output_file}"
+  echo "${alert}" | jq -r '[.policy.name, .policy.description, .policy.severity, .commonEntityInfo.clusterName, .commonEntityInfo.namespace, .commonEntityInfo.resourceType, (if (.commonEntityInfo.resourceType == "DEPLOYMENT") then .deployment.name else .resource.name end), .time, .enforcementCount, .enforcementAction] | @csv' >> "${output_file}"
 done
