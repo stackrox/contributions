@@ -34,7 +34,7 @@ for cluster in $cluster_ids; do
             run_state=$(jq -r .state <<< "$run_status")
             standard=$(jq -r .standardId <<< "$run_status")
             echo "Run $run_id for cluster $cluster and standard $standard has state $run_state"
-            if [[ "$run_state" != "READY" ]]; then
+            if [[ "$run_state" == "FINISHED" ]]; then
                 size=$(( size - 1))
             fi
         done
