@@ -24,12 +24,12 @@ jobs:
         run: |
           set -uo pipefail
           if [[ $BASE_REPO != $HEAD_REPO ]]; then
-            echo "is_external_pr=true" >> $GITHUB_ENV
+            echo "is_external_pr=true" >> $GITHUB_OUTPUT
             gh pr edit \
               ${{ github.event.pull_request.number }} \
               --add-label ${EXTERNAL_PR_LABEL}
           else
-            echo "is_external_pr=false" >> $GITHUB_ENV
+            echo "is_external_pr=false" >> $GITHUB_OUTPUT
           fi
 
   add-to-project:
