@@ -1,0 +1,57 @@
+{
+    "policies": [
+        {
+            "name": "Leaky Vessels: runc container breakout",
+            "description": "CVE-2024-21626 is a vulnerability in the runc container runtime allowing an attacker to break out of the container isolation and achieve full root RCE via a crafted image that exploits an issue within the WORKDIR instruction's handling.",
+            "rationale": "This vulnerability potentially allows an attacker to access host resources using a crafted file descriptor from the container, impacting both build and deployment operations.",
+            "remediation": "Remove Containerfile lines resembling 'WORKDIR /proc/self/fd/[ID]' (with ID being a system dependent file descriptor)",
+            "disabled": false,
+            "categories": [
+                "Anomalous Activity",
+                "Kubernetes"
+            ],
+            "lifecycleStages": [
+                "BUILD",
+                "DEPLOY"
+            ],
+            "eventSource": "NOT_APPLICABLE",
+            "exclusions": [],
+            "scope": [],
+            "severity": "HIGH_SEVERITY",
+            "enforcementActions": [],
+            "notifiers": [],
+            "SORTName": "",
+            "SORTLifecycleStage": "",
+            "SORTEnforcement": false,
+            "policyVersion": "1.1",
+            "policySections": [
+                {
+                    "sectionName": "Policy Section 1",
+                    "policyGroups": [
+                        {
+                            "fieldName": "Dockerfile Line",
+                            "booleanOperator": "OR",
+                            "negate": false,
+                            "values": [
+                                {
+                                    "value": "WORKDIR=.*\\/proc\\/self\\/fd\\/.*"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "mitreAttackVectors": [
+                {
+                    "tactic": "TA0004",
+                    "techniques": [
+                        "T1611"
+                    ]
+                }
+            ],
+            "criteriaLocked": false,
+            "mitreVectorsLocked": false,
+            "isDefault": false
+        }
+    ]
+}
