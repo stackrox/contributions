@@ -100,10 +100,7 @@ get_deployments() {
     	    json_deployments="$(echo "$json_deployments" | jq --arg clusterid "$clusterid_value" '{deployments: [.deployments[] | select(.clusterId == $clusterid)]}')"
         fi
     
-        ndeployment="$(echo $json_deployments | jq '.deployments | length')"
-        for ((i = 0; i < ndeployment; i = i + 1)); do
-            deployments+=("$(echo "$json_deployments" | jq .deployments[$i].id | tr -d '"')")
-        done
+	deployments=($(echo "$json_deployments" | jq -r '.deployments[].id'))
     else
         deployments=($deployment_value)
     fi
