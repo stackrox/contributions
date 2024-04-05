@@ -14,4 +14,4 @@ Run the script ./node-cve-report.sh to generate a results.json file with all CVE
 
 Optional - Save to csv (i.e. ./node-cve-report.sh > report.csv)
 
-
+Important: Red Hat ACS only support Node CVE scanning for RHCOS. It is not designed for non-openshift environments running Kubernetes. See [Documentation](https://docs.openshift.com/acs/4.4/operating/manage-vulnerabilities/scan-rhcos-node-host.html) for more details.
