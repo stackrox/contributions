@@ -1,0 +1,12 @@
+{
+    "endpoints": [
+        {
+            "endpoint_name": "ACS_Demo_Environment",
+            "endpoint_url": "https://central-rhacs-operator.apps.cluster11.sandbox2585.opentlc.com",
+            "endpoint_url_description": "ACS API endpoint for the application to make requess to",
+            "endpoint_token_env_variable_name": "MAIN_ACS_TOKEN",
+            "verify_endpoint_ssl" : "False",
+            "endpoint_token_env_variable_name_description": "Environment Variable to retrieve the Token for this cluster"
+        }
+    ]
+}    
