@@ -6,7 +6,7 @@ pip install -r requirements.txt
 ### Set ACS API keys and Central API endpoint
 ```
 export acs_api_key=<<api_key>>
-export acs_api_key=<https://<acs_central_url/v1>
+export acs_central_api=<https://<acs_central_url/v1>
 ```
 
 ### Expected query arguments 
