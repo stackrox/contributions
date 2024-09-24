@@ -13,8 +13,12 @@ ROX_ENDPOINT_ENV_KEY = "ROX_ENDPOINT"
 ROX_API_TOKEN_ENV_KEY = "ROX_API_TOKEN"
 
 
-def err(msg):
+def log(msg):
     print(msg, file=sys.stderr)
+
+
+def err(msg):
+    log(msg)
     sys.exit(1)
 
 
@@ -78,16 +82,22 @@ class Client:
             'Authorization': f'Bearer {self._auth.api_key}',
         })
 
-        response = requests.get(self._endpoint_path(path), params=params, headers=headers, verify=False).json()
-        self._handle_error_response(response)
-        return response
+        response = requests.get(self._endpoint_path(path), params=params, headers=headers, verify=False)
+        # There's always a json value regardless of success.
+        # On failure, it contains the error message
+
+        value = response.json()
+        if not response.ok:
+            self._handle_error_response(value, response.status_code)
+
+        return value
 
     def _endpoint_path(self, path):
         return f'https://{self._auth.endpoint}/{path}'
 
-    def _handle_error_response(self, response):
+    def _handle_error_response(self, response, status):
         if 'error' not in response:
-            return
+            err(f'Error: request failed with status code {status}')
         err(f'Error: {response['error']}')
 
 
@@ -95,16 +105,21 @@ def flows_table_output(flows, deployment_name, deployment_id):
     print(f'External flows for {deployment_name} ({deployment_id})')
     table = []
     for flow in flows.get('flows', []):
-        props = flow['props']
-        src, dest = props['srcEntity'], props['dstEntity']
+        try:
+            props = flow['props']
+            src, dest = props['srcEntity'], props['dstEntity']
 
-        row = [deployment_name]
-        if src['type'] == 'DEPLOYMENT':
-            row.extend([dest['externalSource']['name'], dest['externalSource']['cidr'], 'EGRESS'])
-        else:
-            row.extend([src['externalSource']['name'], src['externalSource']['cidr'], 'INGRESS'])
+            row = [deployment_name]
+            if src['type'] == 'DEPLOYMENT':
+                row.extend([dest['externalSource']['name'], dest['externalSource']['cidr'], 'EGRESS'])
+            else:
+                row.extend([src['externalSource']['name'], src['externalSource']['cidr'], 'INGRESS'])
 
-        row.extend([props['dstPort'], props['l4protocol']])
+            row.extend([props['dstPort'], props['l4protocol']])
+        except KeyError:
+            log(f'failed to parse {flow}')
+            continue
+
         table.append(row)
 
     print(tabulate.tabulate(table, headers=['Deployment', 'Name', 'CIDR', 'Direction', 'Port', 'Proto']))
@@ -114,8 +129,12 @@ def endpoints_table_output(endpoints, cluster):
     print(f'External entities in cluster {cluster}')
     table = []
     for entity in endpoints.get('entities', []):
-        ip = entity['info']['externalSource']['name']
-        cidr = entity['info']['externalSource']['cidr']
+        try:
+            ip = entity['info']['externalSource']['name']
+            cidr = entity['info']['externalSource']['cidr']
+        except KeyError:
+            log(f"failed to parse {entity}")
+            continue
 
         table.append([ip, cidr])
 
@@ -131,7 +150,6 @@ def entities(args, auth):
         endpoints_table_output(endpoints, args.cluster)
 
 
-
 def deployment(args, auth):
     client = Client(args.cluster, auth)
     deployment_id = client.get_deployment_id(args.deployment)
@@ -144,22 +162,33 @@ def deployment(args, auth):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rox-endpoint", default=os.environ.get(ROX_ENDPOINT_ENV_KEY))
-    parser.add_argument("--rox-api-key", default=os.environ.get(ROX_API_TOKEN_ENV_KEY))
-    parser.add_argument("--json", "-j", action='store_true')
+    parser.add_argument(
+        "--rox-endpoint",
+        default=os.environ.get(ROX_ENDPOINT_ENV_KEY),
+        help="The URL of Central, e.g. localhost:1234",
+    )
+    parser.add_argument(
+        "--rox-api-key",
+        default=os.environ.get(ROX_API_TOKEN_ENV_KEY),
+        help="The API key from Central. Can be generated from the Integrations page in the ACS UI"
+    )
+    parser.add_argument(
+        "--json", "-j", action='store_true',
+        help="Output raw json, instead of a table"
+    )
 
     subparsers = parser.add_subparsers(dest='subcommand')
 
-    ent = subparsers.add_parser('entities')
+    ent = subparsers.add_parser('entities', help='Get all entities for a given cluster')
 
-    ent.add_argument('cluster')
+    ent.add_argument('cluster', help="The name of the cluster to inspect")
     ent.add_argument('--all', '-a', action='store_true', help='Get all entities (not just learned entities)')
     ent.add_argument("--cidr", "-c", help='Filter by CIDR block')
 
-    deploy = subparsers.add_parser('deployment')
+    deploy = subparsers.add_parser('deployment', help='Get all entities for a given deployment')
 
-    deploy.add_argument("cluster")
-    deploy.add_argument("deployment")
+    deploy.add_argument("cluster", help="The name of the cluster to inspect")
+    deploy.add_argument("deployment", help="The name of the deployment to inspect")
 
     args = parser.parse_args()
     if not args.rox_endpoint:
