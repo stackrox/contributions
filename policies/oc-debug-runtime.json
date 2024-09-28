@@ -1,8 +1,7 @@
 {
     "policies": [
         {
-            "id": "5a8a002d-ad68-4998-83cb-4de8cbb4903f",
-            "name": "Probable 'oc debug' access to pod",
+            "name": "Possible 'oc debug' access to pod",
             "description": "Detect attempts to access pods using 'oc debug'",
             "rationale": "'oc debug' can be used to access pod contents, potentially exposing sensitive data.",
             "remediation": "Review OpenShift audit logs to verify the user, and investigate whether this was legitimate trouble-shooting or malicious activity.",
@@ -34,26 +33,6 @@
                             "values": [
                                 {
                                     "value": ".*(sh).*"
-                                }
-                            ]
-                        },
-                        {
-                            "fieldName": "Privileged Container",
-                            "booleanOperator": "OR",
-                            "negate": false,
-                            "values": [
-                                {
-                                    "value": "true"
-                                }
-                            ]
-                        },
-                        {
-                            "fieldName": "Drop Capabilities",
-                            "booleanOperator": "OR",
-                            "negate": false,
-                            "values": [
-                                {
-                                    "value": "ALL"
                                 }
                             ]
                         }
