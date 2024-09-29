@@ -24,7 +24,7 @@
             "policyVersion": "1.1",
             "policySections": [
                 {
-                    "sectionName": "Policy Section 1",
+                    "sectionName": "Shell detection",
                     "policyGroups": [
                         {
                             "fieldName": "Process Name",
@@ -32,7 +32,17 @@
                             "negate": false,
                             "values": [
                                 {
-                                    "value": ".*(sh).*"
+                                    "value": "^.*(sh)$"
+                                }
+                            ]
+                        },
+                        {
+                            "fieldName": "Process UID",
+                            "booleanOperator": "OR",
+                            "negate": false,
+                            "values": [
+                                {
+                                    "value": "0"
                                 }
                             ]
                         }
