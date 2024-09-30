@@ -1,0 +1,58 @@
+{
+    "policies": [
+        {
+            "name": "Possible 'oc debug' access to pod",
+            "description": "Detect attempts to access pods using 'oc debug'",
+            "rationale": "'oc debug' can be used to access pod contents, potentially exposing sensitive data.",
+            "remediation": "Review OpenShift audit logs to verify the user, and investigate whether this was legitimate trouble-shooting or malicious activity.",
+            "disabled": false,
+            "categories": [
+                "Anomalous Activity"
+            ],
+            "lifecycleStages": [
+                "RUNTIME"
+            ],
+            "eventSource": "DEPLOYMENT_EVENT",
+            "exclusions": [],
+            "scope": [],
+            "severity": "HIGH_SEVERITY",
+            "enforcementActions": [],
+            "notifiers": [],
+            "SORTName": "",
+            "SORTLifecycleStage": "",
+            "SORTEnforcement": false,
+            "policyVersion": "1.1",
+            "policySections": [
+                {
+                    "sectionName": "Shell detection",
+                    "policyGroups": [
+                        {
+                            "fieldName": "Process Name",
+                            "booleanOperator": "OR",
+                            "negate": false,
+                            "values": [
+                                {
+                                    "value": "^.*(sh)$"
+                                }
+                            ]
+                        },
+                        {
+                            "fieldName": "Process UID",
+                            "booleanOperator": "OR",
+                            "negate": false,
+                            "values": [
+                                {
+                                    "value": "0"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "mitreAttackVectors": [],
+            "criteriaLocked": false,
+            "mitreVectorsLocked": false,
+            "isDefault": false
+        }
+    ]
+}
