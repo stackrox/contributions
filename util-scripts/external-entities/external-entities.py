@@ -35,7 +35,7 @@ class Client:
         self._cluster_id = None
 
     def get_all_external_entities(self, learned=True, cidr=None):
-        query = f"Learned External Source:{str(learned).lower()}"
+        query = f"Discovered External Source:{str(learned).lower()}"
         if cidr:
             query = f"{query}+External Source Address:{cidr}"
         return self._get(f'v1/networkgraph/cluster/{self.cluster_id()}/externalentities', params={
