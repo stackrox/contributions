@@ -34,8 +34,8 @@ class Client:
         self._cluster = cluster
         self._cluster_id = None
 
-    def get_all_external_entities(self, learned=True, cidr=None):
-        query = f"Learned External Source:{str(learned).lower()}"
+    def get_all_external_entities(self, discovered=True, cidr=None):
+        query = f"Discovered External Source:{str(discovered).lower()}"
         if cidr:
             query = f"{query}+External Source Address:{cidr}"
         return self._get(f'v1/networkgraph/cluster/{self.cluster_id()}/externalentities', params={
@@ -143,7 +143,7 @@ def endpoints_table_output(endpoints, cluster):
 
 def entities(args, auth):
     client = Client(args.cluster, auth)
-    endpoints = client.get_all_external_entities(learned=not args.all, cidr=args.cidr)
+    endpoints = client.get_all_external_entities(discovered=not args.all, cidr=args.cidr)
     if args.json:
         json.dump(endpoints, fp=sys.stdout, indent=4)
     else:
@@ -182,7 +182,7 @@ def main():
     ent = subparsers.add_parser('entities', help='Get all entities for a given cluster')
 
     ent.add_argument('cluster', help="The name of the cluster to inspect")
-    ent.add_argument('--all', '-a', action='store_true', help='Get all entities (not just learned entities)')
+    ent.add_argument('--all', '-a', action='store_true', help='Get all entities (not just discovered entities)')
     ent.add_argument("--cidr", "-c", help='Filter by CIDR block')
 
     deploy = subparsers.add_parser('deployment', help='Get all entities for a given deployment')
