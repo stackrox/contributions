@@ -98,7 +98,7 @@ class Client:
     def _handle_error_response(self, response, status):
         if 'error' not in response:
             err(f'Error: request failed with status code {status}')
-        err(f'Error: {response['error']}')
+        err(f"Error: {response['error']}")
 
 
 def flows_table_output(flows, deployment_name, deployment_id):
@@ -192,9 +192,9 @@ def main():
 
     args = parser.parse_args()
     if not args.rox_endpoint:
-        err("ROX_ENDPOINT must be set")
+        err(f'{ROX_ENDPOINT_ENV_KEY} must be set')
     if not args.rox_api_key:
-        err("ROX_API_KEY must be set")
+        err(f'{ROX_API_TOKEN_ENV_KEY} must be set')
 
     auth = Auth(args.rox_endpoint, args.rox_api_key)
 
