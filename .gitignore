@@ -1,5 +1,7 @@
 # Based on https://gist.github.com/octocat/9257657
 
+.idea
+
 # Compiled source #
 ###################
 *.com
@@ -42,5 +44,6 @@ Thumbs.db
 ##############
 sensor*.zip
 tmp
-/central-bundle/
-
+/central-bundle
+/**/.terraform
+/terraform/**/.terraform.lock.hcl
