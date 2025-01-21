@@ -62,8 +62,8 @@ for deployment_id in $(echo "${res}" | jq -r .alerts[].deployment.id); do
        image_name="$(echo "${image_res}" | jq -rc '.name.fullName')"
        export image_name
 
-       # find the redhat-release version and format lines
-       export ubi_version="$(echo  "${image_res}" | jq '.scan.components[] | select(.name=="redhat-release") | .version'| grep -o '[0-9]\.[0-9]\+' | head -1 )"
+       # find the redhat-release (UBI 8/9) or redhat-release-server (UBI 7) version and format lines
+       export ubi_version="$(echo  "${image_res}" | jq '.scan.components[] | select(.name=="redhat-release" or .name=="redhat-release-server") | .version'| grep -o '[0-9]\.[0-9]\+' | head -1 )"
        echo "${clusterName},${namespace},${deployment_name},${image_name},${ubi_version}" >> "${output_file}"
      fi
    done
