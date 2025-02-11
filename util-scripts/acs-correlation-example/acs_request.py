@@ -1,6 +1,6 @@
 from httpx import AsyncClient,HTTPError,NetworkError,RequestError,TimeoutException,ConnectTimeout,InvalidURL,ProtocolError,ConnectError
 import os
-from httpx._config import SSLConfig
+#from httpx._config import SSLConfig
 from logging import getLogger, config
 import typing as t
 import asyncio
@@ -128,14 +128,29 @@ async def request_processing(full_url_path,insecure:bool=False,headers:dict=None
     """Send the Request and process the response"""
     logger.debug(f"request_processing -start: url:{full_url_path} verify_ssl:{insecure}")
     error=None
+    retry_count=3
+    response_dict={"response_object":[],"error_object":None}
     
-    if params is None:
-        response_dict = await make_request(full_url_path,insecure,headers,params)
-    else:
-        if "pagination.limit" in params and "total_expected_count" in params:
-            response_dict = await request_processing_pagination(full_url_path,insecure,headers,params)
+
+    
+    while retry_count > 0 and retry_count < 4:
+        if params is None:
+            response_dict = await make_request(full_url_path,insecure,headers,params)
         else:
-            response_dict = await make_request(full_url_path,insecure,headers,params)      
+            if "pagination.limit" in params and "total_expected_count" in params:
+                response_dict = await request_processing_pagination(full_url_path,insecure,headers,params)
+            else:
+                response_dict = await make_request(full_url_path,insecure,headers,params)
+        
+        if response_dict["error_object"] is not None:
+            logger.error(f"request_processing - error: {response_dict['error_object']}")
+            retry_count-=1
+            logger.info(f"Retrying request: {retry_count} attempts left")
+            logger.info(f"Sleeping for 5 seconds before retry")
+            await asyncio.sleep(5)
+        else:
+            break
+    
     return response_dict
 
 async def get_acs_alert(url,alert_id: str,insecure:bool=False,headers:dict=None,params:dict=None) -> dict:

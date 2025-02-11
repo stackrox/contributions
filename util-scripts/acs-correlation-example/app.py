@@ -861,7 +861,7 @@ async def generate_cluster_namespace_deployment_alert_output_file():
     """
     Generate the output for the Cluster and Deployment
     """
-    logger.info("Generating Output for Cluster and Deployment")
+    logger.info("Generating Output File for Cluster-Deployment-Namespace-Alerts-Relationship")
 
     exclude_keys = {
     "clusters": {
@@ -953,6 +953,10 @@ async def main():
    
     # Load the ACS Endpoints
     result_endpoint_list = await read_parse_acs_endpoints(settings.endpoint_list_json_path)
+    while result_endpoint_list is None:
+        logger.error("Error reading endpoint list file")
+        logger.info("Exiting")
+        return
     for endpoint in result_endpoint_list.endpoints:
         await ParsedMemory.check_endpoint_valid_healthy(endpoint)                 
 

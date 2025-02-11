@@ -7,15 +7,16 @@ FROM registry.access.redhat.com/ubi9:9.1.0-1782
 #Change User
 USER 0
 
+
 # Install the required software
 RUN dnf install -y wget yum-utils make gcc openssl-devel bzip2-devel libffi-devel zlib-devel && \
-    wget https://www.python.org/ftp/python/3.10.8/Python-3.10.8.tgz && \
-    tar xzf Python-3.10.8.tgz && \
-    cd Python-3.10.8 && \
+    wget https://www.python.org/ftp/python/3.13.2/Python-3.13.2.tgz && \
+    tar xzf Python-3.13.2.tgz && \
+    cd Python-3.13.2 && \
     ./configure --with-system-ffi --with-computed-gotos --enable-loadable-sqlite-extensions && \
     make altinstall && \
     cd .. && \
-    rm Python-3.10.8.tgz
+    rm Python-3.13.2.tgz
 
 # # Install pip
 # RUN curl -O https://bootstrap.pypa.io/get-pip.py && python3 get-pip.py && python3 get-pip.py
@@ -30,7 +31,7 @@ COPY ./ ./app
 WORKDIR ./app
 
 #Install App Dependecies
-RUN pip3.10 install -r requirements.txt && pip3.10 install --upgrade pip
+RUN pip3.13 install -r requirements.txt && pip3.13 install --upgrade pip
 
 #Expose Ports
 EXPOSE 8080/tcp
@@ -38,8 +39,5 @@ EXPOSE 8080/tcp
 #Change Permissions to allow not root-user work
 RUN chmod -R g+rw ./
 
-#Change User
-USER 1001
-
 #ENTRY
-ENTRYPOINT python3.10 app.py
+ENTRYPOINT python3.13 app.py
