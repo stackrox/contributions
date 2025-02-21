@@ -17,7 +17,30 @@
       podman build -t quick_acs_app .
       ```
 
+  - Copy and update endpoint list file and token
+      ```bash
+      export CENTRAL_API_URL="https://console-openshift-console.apps.cluster1.sandbox568.opentlc.com"
+      export MAIN_ACS_TOKEN=""
+      export ENDPOINT_DIR=$(mktemp -d -t ACS_Endpoint_List_XXXX )
+      export OUTPUT_FILE_DIR=$(mktemp -d -t ACS_Output_DIR_XXXX )
+      cat ./endpoint_list.json | envsubst > ${ENDPOINT_DIR}/endpoint_list.json
+      ```
+
   - Run Container
     ```bash
-    podman run --env $MAIN_ACS_TOKEN --env OUTPUT_FOLDER=/output -v /tmp/output:/output:Z localhost/quick_acs_app
+    podman run --name acs_correlator \
+    --replace \
+    --userns=keep-id \
+    --env MAIN_ACS_TOKEN=${MAIN_ACS_TOKEN} \
+    --env ENDPOINT_LIST_JSON_PATH=/endpoint/endpoint_list.json \
+    --env OUTPUT_FOLDER=/output \
+    -v ${OUTPUT_FILE_DIR}:/output:z \
+    -v ${ENDPOINT_DIR}:/endpoint:z \
+    localhost/quick_acs_app
     ```
+ - If All goes well sample output should get written out to ${OUTPUT_FILE_DIR}
+
+ - TODO:
+   - Example uses the [Pydantic Library to create models to export out objects relationships](https://docs.pydantic.dev/1.10/usage/exporting_models/#advanced-include-and-exclude).
+   - The sample relationships used for output can be seen in the [app.py](util-scripts/acs-correlation-example/app.py) on line 866
+   - Will eventually extend this example to get custom relationships and export out a file.

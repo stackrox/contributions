@@ -1,31 +1,222 @@
-//reduced size
 {
     "endpoints": [
         {
             "endpoint_name": "ACS_Demo_Environment",
-            "endpoint_url": "https://central-rhacs-operator.apps.cluster11.sandbox2585.opentlc.com",
+            "endpoint_url": "https://central-rhacs-operator.apps.cluster2.tide.lan",
             "policies": {
                 "policies": [
                     {
-                        "name": "OpenShift: Central Admin Secret Accessed",
+                        "name": "30-Day Scan Age",
                         "severity": "MEDIUM_SEVERITY",
-                        "description": "Alert when the Central secret is accessed.",
+                        "description": "Alert on deployments with images that haven't been scanned in 30 days",
                         "disabled": false,
-                        "eventSource": "AUDIT_LOG_EVENT",
-                        "violation_count": 1
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 0
                     },
                     {
-                        "name": "OpenShift: Kubeadmin Secret Accessed",
-                        "severity": "HIGH_SEVERITY",
-                        "description": "Alert when the kubeadmin secret is accessed",
+                        "name": "90-Day Image Age",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Alert on deployments with images that haven't been updated in 90 days",
                         "disabled": false,
-                        "eventSource": "AUDIT_LOG_EVENT",
+                        "eventSource": "NOT_APPLICABLE",
                         "violation_count": 0
                     },
                     {
                         "name": "ADD Command used instead of COPY",
                         "severity": "LOW_SEVERITY",
                         "description": "Alert on deployments using an ADD command",
+                        "disabled": true,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": null
+                    },
+                    {
+                        "name": "Alpine Linux Package Manager (apk) in Image",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Alert on deployments with the Alpine Linux package manager (apk) present",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Alpine Linux Package Manager Execution",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Alert when the Alpine Linux package manager (apk) is executed at runtime",
+                        "disabled": false,
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Apache Struts: CVE-2017-5638",
+                        "severity": "CRITICAL_SEVERITY",
+                        "description": "Alert on deployments with images containing Apache Struts vulnerability CVE-2017-5638",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "CAP_SYS_ADMIN capability added",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Alert on deployments with containers escalating with CAP_SYS_ADMIN",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "chkconfig Execution",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Detected usage of the chkconfig service manager; typically this is not used within a container",
+                        "disabled": false,
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Compiler Tool Execution",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Alert when binaries used to compile software are executed at runtime",
+                        "disabled": false,
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Container using read-write root filesystem",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Alert on deployments with containers with read-write root filesystem",
+                        "disabled": true,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": null
+                    },
+                    {
+                        "name": "Container with privilege escalation allowed",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Alerts if a deployment has containers with allowPrivilegeEscalation set to true in its security context.",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "crontab Execution",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Detects the usage of the crontab scheduled jobs editor",
+                        "disabled": false,
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Cryptocurrency Mining Process Execution",
+                        "severity": "HIGH_SEVERITY",
+                        "description": "Cryptocurrency mining process spawned",
+                        "disabled": false,
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Curl in Image",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Alert on deployments with curl present",
+                        "disabled": true,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": null
+                    },
+                    {
+                        "name": "Deployments should have at least one ingress Network Policy",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Alerts if deployments are missing an ingress Network Policy",
+                        "disabled": true,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": null
+                    },
+                    {
+                        "name": "Deployments with externally exposed endpoints",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Deployments with externally exposed endpoints represent a higher risk",
+                        "disabled": true,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": null
+                    },
+                    {
+                        "name": "Docker CIS 4.1: Ensure That a User for the Container Has Been Created",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Containers should run as a non-root user",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 47
+                    },
+                    {
+                        "name": "Docker CIS 4.4: Ensure images are scanned and rebuilt to include security patches",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Images should be scanned frequently for any vulnerabilities. You should rebuild all images to include these patches and then instantiate new containers from them.",
+                        "disabled": true,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": null
+                    },
+                    {
+                        "name": "Docker CIS 4.7: Alert on Update Instruction",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Ensure update instructions are not used alone in the Dockerfile",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Docker CIS 5.15: Ensure that the host's process namespace is not shared",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "The Process ID (PID) namespace isolates the process ID space, meaning that processes in different PID namespaces can have the same PID. This creates process level isolation between the containers and the host.",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 3
+                    },
+                    {
+                        "name": "Docker CIS 5.16: Ensure that the host's IPC namespace is not shared",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "IPC (POSIX/SysV IPC) namespace provides separation of named shared memory segments, semaphores and message queues. The IPC namespace on the host should therefore not be shared with containers and should remain isolated.",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Docker CIS 5.19: Ensure mount propagation mode is not enabled",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Mount propagation mode allows mounting container volumes in Bidirectional, Host to Container, and None modes. Do not use Bidirectional mount propagation mode unless explicitly needed.",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Docker CIS 5.1 Ensure that, if applicable, an AppArmor Profile is enabled",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "AppArmor is an effective and easy-to-use Linux application security system. It is available on some Linux distributions by default, for example, on Debian and Ubuntu.",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Docker CIS 5.21: Ensure the default seccomp profile is not disabled",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Seccomp filtering provides a means to filter incoming system calls. The default seccomp profile uses an allow list to permit a large number of common system calls, and block all others.",
+                        "disabled": true,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": null
+                    },
+                    {
+                        "name": "Docker CIS 5.7: Ensure privileged ports are not mapped within containers",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "The TCP/IP port numbers below 1024 are considered privileged ports. Normal users and processes are not allowed to use them for various security reasons. Containers are, however, allowed to map their ports to privileged ports.",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Docker CIS 5.9 and 5.20: Ensure that the host's network namespace is not shared",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "When HostNetwork is enabled the container is not placed inside a separate network stack. The container's networking is not containerized when this option is applied. The consequence of this is that the container has full access to the host's network interfaces. It also enables a shared UTS namespace. The UTS namespace provides isolation between two system identifiers: the hostname and the NIS domain name. It is used to set the hostname and the domain which are visible to running processes in that namespace. Processes running within containers do not typically require to know either the hostname or the domain name. The UTS namespace should therefore not be shared with the host.",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 16
+                    },
+                    {
+                        "name": "Drop All Capabilities",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Alert when a deployment does not drop all capabilities.",
                         "disabled": true,
                         "eventSource": "NOT_APPLICABLE",
                         "violation_count": null
@@ -39,68 +230,12 @@
                         "violation_count": 0
                     },
                     {
-                        "name": "Alpine Linux Package Manager (apk) in Image",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Alert on deployments with the Alpine Linux package manager (apk) present",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Ubuntu Package Manager in Image",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Alert on deployments with components of the Debian/Ubuntu package management system in the image.",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Pod Service Account Token Automatically Mounted",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Protect pod default service account tokens from compromise by minimizing the mounting of the default service account token to only those pods whose application requires interaction with the Kubernetes API.",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 6
-                    },
-                    {
-                        "name": "crontab Execution",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Detects the usage of the crontab scheduled jobs editor",
-                        "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Unauthorized Process Execution",
+                        "name": "Environment Variable Contains Secret",
                         "severity": "HIGH_SEVERITY",
-                        "description": "This policy generates a violation for any process execution that is not explicitly allowed by a locked process baseline for a given container specification within a Kubernetes deployment.",
-                        "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "CAP_SYS_ADMIN capability added",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Alert on deployments with containers escalating with CAP_SYS_ADMIN",
+                        "description": "Alert on deployments with environment variables that contain 'SECRET'",
                         "disabled": false,
                         "eventSource": "NOT_APPLICABLE",
                         "violation_count": 0
-                    },
-                    {
-                        "name": "Secure Shell (ssh) Port Exposed",
-                        "severity": "HIGH_SEVERITY",
-                        "description": "Alert on deployments exposing port 22, commonly reserved for SSH access.",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Curl in Image",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Alert on deployments with curl present",
-                        "disabled": true,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": null
                     },
                     {
                         "name": "Fixable CVSS >= 6 and Privileged",
@@ -119,52 +254,84 @@
                         "violation_count": null
                     },
                     {
-                        "name": "Deployments should have at least one ingress Network Policy",
+                        "name": "Fixable Severity at least Important",
+                        "severity": "HIGH_SEVERITY",
+                        "description": "Alert on deployments with fixable vulnerabilities with a Severity Rating at least Important",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 177
+                    },
+                    {
+                        "name": "Images with no scans",
                         "severity": "MEDIUM_SEVERITY",
-                        "description": "Alerts if deployments are missing an ingress Network Policy",
+                        "description": "Alert on deployments with images that have not been scanned",
                         "disabled": true,
                         "eventSource": "NOT_APPLICABLE",
                         "violation_count": null
                     },
                     {
-                        "name": "Red Hat Package Manager in Image",
+                        "name": "Improper Usage of Orchestrator Secrets Volume",
                         "severity": "LOW_SEVERITY",
-                        "description": "Alert on deployments with components of the Red Hat/Fedora/CentOS package management system.",
+                        "description": "Alert on deployments that use a Dockerfile with 'VOLUME /run/secrets'",
                         "disabled": false,
                         "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 1
+                        "violation_count": 0
                     },
                     {
-                        "name": "Netcat Execution Detected",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Detects execution of netcat in a container",
+                        "name": "Insecure specified in CMD",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Alert on deployments using 'insecure' in the command",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "iptables Execution",
+                        "severity": "HIGH_SEVERITY",
+                        "description": "Detects execution of iptables; iptables is a deprecated way of managing network state in containers",
+                        "disabled": false,
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": 9
+                    },
+                    {
+                        "name": "Iptables or nftables Executed in Privileged Container",
+                        "severity": "CRITICAL_SEVERITY",
+                        "description": "Alert on privileged pods that execute iptables or nftables",
                         "disabled": false,
                         "eventSource": "DEPLOYMENT_EVENT",
                         "violation_count": 0
                     },
                     {
-                        "name": "Mount Container Runtime Socket",
+                        "name": "Kubernetes Actions: Exec into Pod",
+                        "severity": "HIGH_SEVERITY",
+                        "description": "Alerts when Kubernetes API receives request to execute command in container",
+                        "disabled": false,
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Kubernetes Actions: Port Forward to Pod",
                         "severity": "MEDIUM_SEVERITY",
-                        "description": "Alert on deployments with a volume mount on the container runtime socket",
+                        "description": "Alerts when Kubernetes API receives port forward request",
+                        "disabled": false,
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Kubernetes Dashboard Deployed",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Alert on the presence of the Kubernetes dashboard service",
                         "disabled": false,
                         "eventSource": "NOT_APPLICABLE",
                         "violation_count": 0
                     },
                     {
-                        "name": "Drop All Capabilities",
+                        "name": "Latest tag",
                         "severity": "LOW_SEVERITY",
-                        "description": "Alert when a deployment does not drop all capabilities.",
-                        "disabled": true,
+                        "description": "Alert on deployments with images using tag 'latest'",
+                        "disabled": false,
                         "eventSource": "NOT_APPLICABLE",
-                        "violation_count": null
-                    },
-                    {
-                        "name": "Required Annotation: Email",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Alert on deployments missing the 'email' annotation",
-                        "disabled": true,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": null
+                        "violation_count": 0
                     },
                     {
                         "name": "Linux Group Add Execution",
@@ -183,73 +350,41 @@
                         "violation_count": 0
                     },
                     {
-                        "name": "Alpine Linux Package Manager Execution",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Alert when the Alpine Linux package manager (apk) is executed at runtime",
-                        "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Ubuntu Package Manager Execution",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Alert when Debian/Ubuntu package manager programs are executed at runtime",
-                        "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "chkconfig Execution",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Detected usage of the chkconfig service manager; typically this is not used within a container",
-                        "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Red Hat Package Manager Execution",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Alert when Red Hat/Fedora/CentOS package manager programs are executed at runtime.",
-                        "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
-                        "violation_count": 1
-                    },
-                    {
-                        "name": "Iptables or nftables Executed in Privileged Container",
+                        "name": "Log4Shell: log4j Remote Code Execution vulnerability",
                         "severity": "CRITICAL_SEVERITY",
-                        "description": "Alert on privileged pods that execute iptables or nftables",
+                        "description": "Alert on deployments with images containing the Log4Shell vulnerabilities (CVE-2021-44228 and CVE-2021-45046). There are flaws in the Java logging library Apache Log4j in versions from 2.0-beta9 to 2.15.0, excluding 2.12.2.",
                         "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
+                        "eventSource": "NOT_APPLICABLE",
                         "violation_count": 0
                     },
                     {
-                        "name": "iptables Execution",
+                        "name": "Login Binaries",
                         "severity": "HIGH_SEVERITY",
-                        "description": "Detects execution of iptables; iptables is a deprecated way of managing network state in containers",
-                        "disabled": false,
+                        "description": "Processes that indicate login attempts",
+                        "disabled": true,
                         "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": null
+                    },
+                    {
+                        "name": "Mount Container Runtime Socket",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Alert on deployments with a volume mount on the container runtime socket",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
                         "violation_count": 0
                     },
                     {
-                        "name": "Shell Spawned by Java Application",
-                        "severity": "HIGH_SEVERITY",
-                        "description": "Detects execution of shell (bash/csh/sh/zsh) as a subprocess of a java application",
+                        "name": "Mounting Sensitive Host Directories",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Alert on deployments mounting sensitive host directories",
                         "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
-                        "violation_count": 0
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 34
                     },
                     {
-                        "name": "Compiler Tool Execution",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Alert when binaries used to compile software are executed at runtime",
-                        "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Cryptocurrency Mining Process Execution",
-                        "severity": "HIGH_SEVERITY",
-                        "description": "Cryptocurrency mining process spawned",
+                        "name": "Netcat Execution Detected",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Detects execution of netcat in a container",
                         "disabled": false,
                         "eventSource": "DEPLOYMENT_EVENT",
                         "violation_count": 0
@@ -271,36 +406,68 @@
                         "violation_count": 0
                     },
                     {
-                        "name": "Remote File Copy Binary Execution",
+                        "name": "No CPU request or memory limit specified",
                         "severity": "MEDIUM_SEVERITY",
-                        "description": "Alert on deployments that execute a remote file copy tool",
+                        "description": "Alert on deployments that have containers without CPU request or memory limit",
                         "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
+                        "eventSource": "NOT_APPLICABLE",
                         "violation_count": 0
                     },
                     {
-                        "name": "Secure Shell Server (sshd) Execution",
-                        "severity": "HIGH_SEVERITY",
-                        "description": "Detects container running the SSH daemon",
+                        "name": "OpenShift: Central Admin Secret Accessed",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Alert when the Central secret is accessed.",
                         "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "systemctl Execution",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Detected usage of the systemctl service manager",
-                        "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
+                        "eventSource": "AUDIT_LOG_EVENT",
                         "violation_count": 1
                     },
                     {
-                        "name": "systemd Execution",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Detected usage of the systemd service manager",
+                        "name": "OpenShift: Kubeadmin Secret Accessed",
+                        "severity": "HIGH_SEVERITY",
+                        "description": "Alert when the kubeadmin secret is accessed",
                         "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
+                        "eventSource": "AUDIT_LOG_EVENT",
                         "violation_count": 0
+                    },
+                    {
+                        "name": "OpenShift: Kubernetes Secret Accessed by an Impersonated User",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Alert when user impersonation is used to access a secret within the cluster.",
+                        "disabled": false,
+                        "eventSource": "AUDIT_LOG_EVENT",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Password Binaries",
+                        "severity": "HIGH_SEVERITY",
+                        "description": "Processes that indicate attempts to change passwd",
+                        "disabled": true,
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": null
+                    },
+                    {
+                        "name": "Pod Service Account Token Automatically Mounted",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Protect pod default service account tokens from compromise by minimizing the mounting of the default service account token to only those pods whose application requires interaction with the Kubernetes API.",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 22
+                    },
+                    {
+                        "name": "Privileged Container",
+                        "severity": "MEDIUM_SEVERITY",
+                        "description": "Alert on deployments with containers running in privileged mode",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 68
+                    },
+                    {
+                        "name": "Privileged Containers with Important and Critical Fixable CVEs",
+                        "severity": "HIGH_SEVERITY",
+                        "description": "Alert on containers running in privileged mode with important or critical fixable vulnerabilities",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 44
                     },
                     {
                         "name": "Process Targeting Cluster Kubelet Endpoint",
@@ -327,153 +494,49 @@
                         "violation_count": 0
                     },
                     {
-                        "name": "Deployments with externally exposed endpoints",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Deployments with externally exposed endpoints represent a higher risk",
-                        "disabled": true,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": null
-                    },
-                    {
-                        "name": "Docker CIS 4.4: Ensure images are scanned and rebuilt to include security patches",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Images should be scanned frequently for any vulnerabilities. You should rebuild all images to include these patches and then instantiate new containers from them.",
-                        "disabled": true,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": null
-                    },
-                    {
-                        "name": "Docker CIS 5.16: Ensure that the host's IPC namespace is not shared",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "IPC (POSIX/SysV IPC) namespace provides separation of named shared memory segments, semaphores and message queues. The IPC namespace on the host should therefore not be shared with containers and should remain isolated.",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Docker CIS 5.9 and 5.20: Ensure that the host's network namespace is not shared",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "When HostNetwork is enabled the container is not placed inside a separate network stack. The container's networking is not containerized when this option is applied. The consequence of this is that the container has full access to the host's network interfaces. It also enables a shared UTS namespace. The UTS namespace provides isolation between two system identifiers: the hostname and the NIS domain name. It is used to set the hostname and the domain which are visible to running processes in that namespace. Processes running within containers do not typically require to know either the hostname or the domain name. The UTS namespace should therefore not be shared with the host.",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Docker CIS 5.15: Ensure that the host's process namespace is not shared",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "The Process ID (PID) namespace isolates the process ID space, meaning that processes in different PID namespaces can have the same PID. This creates process level isolation between the containers and the host.",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "90-Day Image Age",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Alert on deployments with images that haven't been updated in 90 days",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 120
-                    },
-                    {
-                        "name": "Secure Shell (ssh) Port Exposed in Image",
+                        "name": "Process with UID 0",
                         "severity": "HIGH_SEVERITY",
-                        "description": "Alert on deployments exposing port 22, commonly reserved for SSH access.",
-                        "disabled": false,
+                        "description": "Alert on deployments that contain processes running with UID 0",
+                        "disabled": true,
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": null
+                    },
+                    {
+                        "name": "Rapid Reset: Denial of Service Vulnerability in HTTP/2 Protocol",
+                        "severity": "HIGH_SEVERITY",
+                        "description": "Alert on deployments with images containing components that are susceptible to a Denial of Service (DoS) vulnerability for HTTP/2 servers.",
+                        "disabled": true,
                         "eventSource": "NOT_APPLICABLE",
+                        "violation_count": null
+                    },
+                    {
+                        "name": "Red Hat Package Manager Execution",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Alert when Red Hat/Fedora/CentOS package manager programs are executed at runtime.",
+                        "disabled": false,
+                        "eventSource": "DEPLOYMENT_EVENT",
                         "violation_count": 0
                     },
                     {
-                        "name": "OpenShift: Kubernetes Secret Accessed by an Impersonated User",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Alert when user impersonation is used to access a secret within the cluster.",
+                        "name": "Red Hat Package Manager in Image",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Alert on deployments with components of the Red Hat/Fedora/CentOS package management system.",
                         "disabled": false,
-                        "eventSource": "AUDIT_LOG_EVENT",
+                        "eventSource": "NOT_APPLICABLE",
                         "violation_count": 1
                     },
                     {
-                        "name": "Insecure specified in CMD",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Alert on deployments using 'insecure' in the command",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Kubernetes Dashboard Deployed",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Alert on the presence of the Kubernetes dashboard service",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Latest tag",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Alert on deployments with images using tag 'latest'",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Log4Shell: log4j Remote Code Execution vulnerability",
-                        "severity": "CRITICAL_SEVERITY",
-                        "description": "Alert on deployments with images containing the Log4Shell vulnerabilities (CVE-2021-44228 and CVE-2021-45046). There are flaws in the Java logging library Apache Log4j in versions from 2.0-beta9 to 2.15.0, excluding 2.12.2.",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Login Binaries",
-                        "severity": "HIGH_SEVERITY",
-                        "description": "Processes that indicate login attempts",
-                        "disabled": true,
-                        "eventSource": "DEPLOYMENT_EVENT",
-                        "violation_count": null
-                    },
-                    {
-                        "name": "Docker CIS 5.19: Ensure mount propagation mode is not enabled",
+                        "name": "Remote File Copy Binary Execution",
                         "severity": "MEDIUM_SEVERITY",
-                        "description": "Mount propagation mode allows mounting container volumes in Bidirectional, Host to Container, and None modes. Do not use Bidirectional mount propagation mode unless explicitly needed.",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Unauthorized Network Flow",
-                        "severity": "HIGH_SEVERITY",
-                        "description": "This policy generates a violation for the network flows that fall outside baselines for which 'alert on anomalous violations' is set.",
+                        "description": "Alert on deployments that execute a remote file copy tool",
                         "disabled": false,
                         "eventSource": "DEPLOYMENT_EVENT",
                         "violation_count": 0
                     },
                     {
-                        "name": "Docker CIS 5.1 Ensure that, if applicable, an AppArmor Profile is enabled",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "AppArmor is an effective and easy-to-use Linux application security system. It is available on some Linux distributions by default, for example, on Debian and Ubuntu.",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "No CPU request or memory limit specified",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Alert on deployments that have containers without CPU request or memory limit",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Images with no scans",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Alert on deployments with images that have not been scanned",
-                        "disabled": true,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": null
-                    },
-                    {
-                        "name": "Docker CIS 5.21: Ensure the default seccomp profile is not disabled",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Seccomp filtering provides a means to filter incoming system calls. The default seccomp profile uses an allow list to permit a large number of common system calls, and block all others.",
+                        "name": "Required Annotation: Email",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Alert on deployments missing the 'email' annotation",
                         "disabled": true,
                         "eventSource": "NOT_APPLICABLE",
                         "violation_count": null
@@ -487,6 +550,14 @@
                         "violation_count": null
                     },
                     {
+                        "name": "Required Image Label",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Alert on deployments with images missing the specified label.",
+                        "disabled": true,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": null
+                    },
+                    {
                         "name": "Required Label: Owner/Team",
                         "severity": "LOW_SEVERITY",
                         "description": "Alert on deployments missing the 'owner' or 'team' label",
@@ -495,49 +566,49 @@
                         "violation_count": null
                     },
                     {
-                        "name": "Password Binaries",
+                        "name": "Secret Mounted as Environment Variable",
                         "severity": "HIGH_SEVERITY",
-                        "description": "Processes that indicate attempts to change passwd",
+                        "description": "Alert on deployments with Kubernetes secret mounted as environment variable",
+                        "disabled": true,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": null
+                    },
+                    {
+                        "name": "Secure Shell Server (sshd) Execution",
+                        "severity": "HIGH_SEVERITY",
+                        "description": "Detects container running the SSH daemon",
+                        "disabled": false,
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Secure Shell (ssh) Port Exposed",
+                        "severity": "HIGH_SEVERITY",
+                        "description": "Alert on deployments exposing port 22, commonly reserved for SSH access.",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Secure Shell (ssh) Port Exposed in Image",
+                        "severity": "HIGH_SEVERITY",
+                        "description": "Alert on deployments exposing port 22, commonly reserved for SSH access.",
+                        "disabled": false,
+                        "eventSource": "NOT_APPLICABLE",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "SetUID Processes",
+                        "severity": "HIGH_SEVERITY",
+                        "description": "Processes that are known to use setuid binaries",
                         "disabled": true,
                         "eventSource": "DEPLOYMENT_EVENT",
                         "violation_count": null
                     },
                     {
-                        "name": "Kubernetes Actions: Exec into Pod",
+                        "name": "Shadow File Modification",
                         "severity": "HIGH_SEVERITY",
-                        "description": "Alerts when Kubernetes API receives request to execute command in container",
-                        "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Kubernetes Actions: Port Forward to Pod",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Alerts when Kubernetes API receives port forward request",
-                        "disabled": false,
-                        "eventSource": "DEPLOYMENT_EVENT",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Container with privilege escalation allowed",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Alerts if a deployment has containers with allowPrivilegeEscalation set to true in its security context.",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Privileged Container",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Alert on deployments with containers running in privileged mode",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 24
-                    },
-                    {
-                        "name": "Process with UID 0",
-                        "severity": "HIGH_SEVERITY",
-                        "description": "Alert on deployments that contain processes running with UID 0",
+                        "description": "Processes that indicate attempts to modify shadow files",
                         "disabled": true,
                         "eventSource": "DEPLOYMENT_EVENT",
                         "violation_count": null
@@ -551,116 +622,12 @@
                         "violation_count": null
                     },
                     {
-                        "name": "Rapid Reset: Denial of Service Vulnerability in HTTP/2 Protocol",
-                        "severity": "CRITICAL_SEVERITY",
-                        "description": "Alert on deployments with images containing components that are susceptible to a Denial of Service (DoS) vulnerability for HTTP/2 servers.",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Container using read-write root filesystem",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Alert on deployments with containers with read-write root filesystem",
-                        "disabled": true,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": null
-                    },
-                    {
-                        "name": "Required Image Label",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Alert on deployments with images missing the specified label.",
-                        "disabled": true,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": null
-                    },
-                    {
-                        "name": "Docker CIS 5.7: Ensure privileged ports are not mapped within containers",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "The TCP/IP port numbers below 1024 are considered privileged ports. Normal users and processes are not allowed to use them for various security reasons. Containers are, however, allowed to map their ports to privileged ports.",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Docker CIS 4.1: Ensure That a User for the Container Has Been Created",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Containers should run as a non-root user",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 1
-                    },
-                    {
-                        "name": "Improper Usage of Orchestrator Secrets Volume",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Alert on deployments that use a Dockerfile with 'VOLUME /run/secrets'",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "30-Day Scan Age",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Alert on deployments with images that haven't been scanned in 30 days",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Environment Variable Contains Secret",
+                        "name": "Shell Spawned by Java Application",
                         "severity": "HIGH_SEVERITY",
-                        "description": "Alert on deployments with environment variables that contain 'SECRET'",
+                        "description": "Detects execution of shell (bash/csh/sh/zsh) as a subprocess of a java application",
                         "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 0
-                    },
-                    {
-                        "name": "Secret Mounted as Environment Variable",
-                        "severity": "HIGH_SEVERITY",
-                        "description": "Alert on deployments with Kubernetes secret mounted as environment variable",
-                        "disabled": true,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": null
-                    },
-                    {
-                        "name": "Mounting Sensitive Host Directories",
-                        "severity": "MEDIUM_SEVERITY",
-                        "description": "Alert on deployments mounting sensitive host directories",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 1
-                    },
-                    {
-                        "name": "SetUID Processes",
-                        "severity": "HIGH_SEVERITY",
-                        "description": "Processes that are known to use setuid binaries",
-                        "disabled": true,
                         "eventSource": "DEPLOYMENT_EVENT",
-                        "violation_count": null
-                    },
-                    {
-                        "name": "Privileged Containers with Important and Critical Fixable CVEs",
-                        "severity": "HIGH_SEVERITY",
-                        "description": "Alert on containers running in privileged mode with important or critical fixable vulnerabilities",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 23
-                    },
-                    {
-                        "name": "Fixable Severity at least Important",
-                        "severity": "HIGH_SEVERITY",
-                        "description": "Alert on deployments with fixable vulnerabilities with a Severity Rating at least Important",
-                        "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
-                        "violation_count": 120
-                    },
-                    {
-                        "name": "Shadow File Modification",
-                        "severity": "HIGH_SEVERITY",
-                        "description": "Processes that indicate attempts to modify shadow files",
-                        "disabled": true,
-                        "eventSource": "DEPLOYMENT_EVENT",
-                        "violation_count": null
+                        "violation_count": 0
                     },
                     {
                         "name": "Spring4Shell (Spring Framework Remote Code Execution) and Spring Cloud Function vulnerabilities",
@@ -671,19 +638,51 @@
                         "violation_count": 0
                     },
                     {
-                        "name": "Apache Struts: CVE-2017-5638",
-                        "severity": "CRITICAL_SEVERITY",
-                        "description": "Alert on deployments with images containing Apache Struts vulnerability CVE-2017-5638",
+                        "name": "systemctl Execution",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Detected usage of the systemctl service manager",
+                        "disabled": false,
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "systemd Execution",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Detected usage of the systemd service manager",
+                        "disabled": false,
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Ubuntu Package Manager Execution",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Alert when Debian/Ubuntu package manager programs are executed at runtime",
+                        "disabled": false,
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Ubuntu Package Manager in Image",
+                        "severity": "LOW_SEVERITY",
+                        "description": "Alert on deployments with components of the Debian/Ubuntu package management system in the image.",
                         "disabled": false,
                         "eventSource": "NOT_APPLICABLE",
                         "violation_count": 0
                     },
                     {
-                        "name": "Docker CIS 4.7: Alert on Update Instruction",
-                        "severity": "LOW_SEVERITY",
-                        "description": "Ensure update instructions are not used alone in the Dockerfile",
+                        "name": "Unauthorized Network Flow",
+                        "severity": "HIGH_SEVERITY",
+                        "description": "This policy generates a violation for the network flows that fall outside baselines for which 'alert on anomalous violations' is set.",
                         "disabled": false,
-                        "eventSource": "NOT_APPLICABLE",
+                        "eventSource": "DEPLOYMENT_EVENT",
+                        "violation_count": 0
+                    },
+                    {
+                        "name": "Unauthorized Process Execution",
+                        "severity": "HIGH_SEVERITY",
+                        "description": "This policy generates a violation for any process execution that is not explicitly allowed by a locked process baseline for a given container specification within a Kubernetes deployment.",
+                        "disabled": false,
+                        "eventSource": "DEPLOYMENT_EVENT",
                         "violation_count": 0
                     },
                     {
