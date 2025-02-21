@@ -1,20 +1,79 @@
+""" _description_   
+    This module provides classes and functions to interact with ACS (Advanced Cluster Security) API, 
+    retrieve and process data related to alerts, policies, deployments, and clusters. 
+    It includes asynchronous methods for reading, writing, and processing data, 
+    as well as managing the state of the application.
+    Classes:
+        ACSAlertCount: Represents the count of ACS alerts.
+        ACSViolations: Represents ACS violations with optional attributes.
+        ACSImageDetails: Represents details of an ACS image.
+        ACSImage: Represents an ACS image with optional attributes.
+        ACSContainer: Represents an ACS container with optional attributes.
+        ACSContainerlist: Represents a list of ACS containers.
+        ACSDeployment: Represents an affected RHACS deployment.
+        ACSDeploymentList: Represents a list of deployments obtained from RHACS.
+        ACSPolicy: Represents policy information for a policy generating a violation.
+        ACSPolicyList: Represents a list of policies obtained from ACS.
+        ACSAlert: Represents alert information from RHACS.
+        ACSAlertList: Represents a list of alerts obtained from RHACS.
+        OCPNamespace: Represents OCP namespace information.
+        OCPNamespaceList: Represents a list of OCP namespaces.
+        OCPCluster: Represents OCP cluster information.
+        OCPClusterlist: Represents a list of OCP clusters.
+        ACSEndpoint: Represents ACS endpoint information.
+        ACSEndpointList: Represents a list of ACS endpoints.
+        ParsedMemory: A static class container that contains parsed data in memory at the cluster level.
+    Functions:
+        write_output_file(file_path: str, content: str) -> None:
+            Writes the content to a file asynchronously.
+        read_parse_acs_endpoints(endpoint_file) -> ACSEndpointList:
+            Reads and parses the list of ACS endpoints to poll.
+        get_endpoint_policies(ACSEndpoint: ACSEndpoint) -> ACSPolicyList:
+            Retrieves the list of policies for the ACS endpoints.
+        update_endpoint_policy_alert_count(ACSEndpoint: ACSEndpoint, ACSPolicyList: ACSPolicyList) -> None:
+            Updates the policy alert count.
+        get_alerts_for_policy(ACSEndpoint: ACSEndpoint, ACSPolicy: ACSPolicy) -> ACSAlert:
+            Retrieves alerts for a specific policy.
+        get_deployment_metadata_for_alert(alert: ACSAlert, ACSEndpoint: ACSEndpoint) -> ACSDeployment:
+            Retrieves deployment metadata for an alert.
+        continuously_process_healthy_endpoints():
+            Continuously processes healthy endpoints.
+        generate_cluster_namespace_deployment_alert_output_file():
+            Generates the output file for the cluster, namespace, deployment, and alert relationship.
+        generate_endpoint_policy_alert_count_output_file():
+            Generates the output file for the policy alert count.
+        main():
+            The main function for the application startup.
+    Entry Point:
+        The application runs in an asyncio loop and processes data from ACS endpoints.
+    
+    Raises:
+        Exception: _description_
+        Exception: _description_
+    
+    Returns:
+        _type_: _description_
+"""
+
 import asyncio
+import httpx
 from os import path, getenv
-from signal import SIGTERM
-from logging import getLogger, config
-from acs_request import get_acs_alert, get_rhacs_health,get_policy,get_alert_count,get_acs_deployment
-from pydantic import BaseModel, SecretStr, ValidationError, Field, field_serializer
+from uuid import uuid4,UUID
+from pydantic import BaseModel, SecretStr, ValidationError, ConfigDict, Field
 from pydantic_core import from_json
 from aiofiles import open as async_open, os as aiofiles_os
 from typing import Any, Optional, AsyncGenerator, Any
 from config import settings
 from typing_extensions import Annotated
-from uuid import uuid4, UUID
+from signal import SIGTERM
+from logging import getLogger, config
+from acs_request import get_acs_alert, get_rhacs_health, get_policy, get_alert_count, get_acs_deployment
 
 
 class ACSAlertCount(BaseModel):
+    """Represents the count of ACS alerts."""
     count: int
-    
+
 class ACSViolations(BaseModel):
     message: str
     keyValueAttrs: Optional[dict] = None
@@ -120,7 +179,7 @@ class ACSPolicyList(BaseModel):
     endpoint_uuid: UUID = None
       
     async def get_policy_count(self):
-        return len(self.policies)       
+        return len(self.policies)
         
 class ACSAlert(BaseModel):  
     '''Class For Alert Information from RHACS'''
@@ -175,11 +234,13 @@ class OCPClusterlist(BaseModel):
     
 class ACSEndpoint(BaseModel):
     '''App Object - ACS Endpoint Information'''
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     internal_id: UUID = Field(default_factory=uuid4)
     endpoint_name: str
     endpoint_url: str
     endpoint_token_env_variable_name: str
     endpoint_token: SecretStr = Field(default="Empty",exclude=True)
+    endpoint_client: Optional[httpx.AsyncClient] = Field(default=None,exclude=True)
     verify_endpoint_ssl: bool = False
     healthy: bool = False
     metadata_processed: Optional[bool] = False
@@ -188,6 +249,16 @@ class ACSEndpoint(BaseModel):
     endpoint_token_env_variable_name_description:str = "Environment Variable to retrieve the Token for this cluster"
     policies: ACSPolicyList = ACSPolicyList(policies=[])
         
+
+        
+    def initialize(self,token:str,client:httpx.AsyncClient) -> None:        
+        self.endpoint_token = token
+        if client is None:
+            self.endpoint_client = httpx.AsyncClient(verify=self.verify_endpoint_ssl)
+        else:
+            self.endpoint_client = client
+        self.initialized = True
+            
     def get_health(self) -> bool:
         if not self.initialized:
             return False      
@@ -195,6 +266,7 @@ class ACSEndpoint(BaseModel):
     
     def set_health(self,health:bool) -> None:
         self.healthy = health
+        
     
 class ACSEndpointList(BaseModel):
     '''App Object - ACS Endpoint List'''
@@ -369,12 +441,12 @@ class ParsedMemory():
         """
         if not cls._lock.locked():
             raise Exception(f"Lock not acquired for {cls.check_namespace_exists_else_create.__name__} method") 
-                  
+
         logger.debug(f"Check if Namespace with ID {namespace_id} exists in our data")
         if namespace_id in cls.map_namespace_id_namespace_object.keys():
             return cls.map_namespace_id_namespace_object[namespace_id]
         else:
-            logger.debug(f"Namespace with ID {namespace_id} does not exist in our data, creating new Namespace")
+            logger.debug("Namespace with ID %s does not exist in our data, creating new Namespace", namespace_id)
             new_namespace = OCPNamespace(namespace_id=namespace_id,namespace_name="",deployments=ACSDeploymentList(deployments=[]) ,alerts=ACSAlertList(alerts=[]))
             cls.namespace_list.namespaces.append(new_namespace)
             cls.map_namespace_id_namespace_object[namespace_id] = new_namespace
@@ -402,64 +474,80 @@ class ParsedMemory():
             cls.ocp_clusters.clusters.append(new_cluster)
             cls.map_cluster_id_cluster_object[cluster_id] = new_cluster
             return new_cluster
-                         
+    
     @classmethod
-    async def check_endpoint_valid_healthy(cls,ACS_Endpoint:ACSEndpoint):
+    async def initialize_endpoints(cls) -> None:
+        """
+        Initialize the Endpoint
+        """
+        if not cls._lock.locked():
+            raise Exception(f"Lock not acquired for {cls.initialize_endpoints.__name__} method") 
+        
+        for endpoint in cls.endpoint_list.endpoints:
+            if not endpoint.initialized:
+                await endpoint.initialize()
+    @classmethod
+    async def check_endpoint_valid_healthy(cls,ACS_Endpoint:ACSEndpoint) -> bool:
         """
         Check if the Endpoint is Healthy and Ready
         """
         
         logger.info(f"Checking Health of Endpoint {ACS_Endpoint.endpoint_name}")
-        if not ACS_Endpoint.initialized:
-            try:
-                token=getenv(ACS_Endpoint.endpoint_token_env_variable_name)
-            except:
-                logger.error(f"Error reading token from environment variable {ACS_Endpoint.endpoint_token_env_variable_name} for Endpoint {ACS_Endpoint.endpoint_name}")
-                return
-            ACS_Endpoint.endpoint_token = token
-            ACS_Endpoint.initialized = True
-                               
+        attempt = 0
         count = settings.health_check_retry_count
-        for i in range(count):  
+        response_dict = {"error_object": "Pre-Request Error", "response_object": None}
+        
+        if not ACS_Endpoint.initialized:
+            token=getenv(ACS_Endpoint.endpoint_token_env_variable_name)
+            ACS_Endpoint.initialize(token=token,client=None)
+       
+        while response_dict["error_object"] is not None and attempt < count:
             headers={"Authorization": f"Bearer {ACS_Endpoint.endpoint_token}",
                     "Content-Type": "application/json"}
+            
+            #Error while making the call
             try:
-                response_dict = await get_rhacs_health(ACS_Endpoint.endpoint_url,ACS_Endpoint.verify_endpoint_ssl,headers)
-                if "error_object" in response_dict and response_dict["error_object"] is not None:
-                    logger.error(f"Policy Data Not Retrieved for Endpoint {ACSEndpoint.endpoint_name}")
-                    logger.error(f"Error: {response_dict['error_object']}")
-                    continue
-                
-                if response_dict["response_object"].status_code == 200:
-                    logger.info(f"ACS API Connection Successful for Endpoint {ACS_Endpoint.endpoint_name} ")
-                    ACS_Endpoint.set_health(True)
-                else:
-                    logger.error(f"ACS API Connection Failed for Endpoint {ACS_Endpoint.endpoint_name} ")
-            except Exception as e:
-                logger.error(f"ACS API Connection Failed for Endpoint {ACS_Endpoint.endpoint_name} ")
-                logger.error(f"Error: {e}")
-            finally:
-                if ACS_Endpoint.healthy:
-                    await cls.append_endpoint(ACS_Endpoint)                   
-                    break
-                else:
-                    if i < count:
-                        logger.info(f"Retrying Health Check for Endpoint {ACS_Endpoint.endpoint_name} in {settings.health_check_retry_delay} seconds")
-                        await asyncio.sleep(settings.health_check_retry_delay)
-                    else:
-                        logger.error(f"Health Check Failed for Endpoint {ACS_Endpoint.endpoint_name}")
-                        logger.info("We will not be able to poll this endpoint for data")
-                        return
-    
+                response_dict = await get_rhacs_health(ACS_Endpoint.endpoint_client,ACS_Endpoint.endpoint_url,ACS_Endpoint.verify_endpoint_ssl,headers)
+            except:
+                logger.error(f"Error Checking Health for Endpoint {ACS_Endpoint.endpoint_name}")
+                logger.error(f"Error: {response_dict['error_object']}")
+                await asyncio.sleep(settings.health_check_retry_delay)
+                attempt += 1
+                continue
+
+            #Error in the response
+            if response_dict["response_object"] is not None:
+                if response_dict["response_object"].status_code != 200:
+                    logger.error(f"Response Code: {response_dict['response_object'].status_code}")  
+                    logger.error(f"Error Checking Health for Endpoint {ACS_Endpoint.endpoint_name}")
+                    logger.error(f"Error: {response_dict['error_object']}")               
+                    await asyncio.sleep(settings.health_check_retry_delay)
+                    attempt += 1
+        
+        #If we have exhausted all attempts
+        if attempt >= count:
+            logger.error(f"Failed to get Health for Endpoint {ACS_Endpoint.endpoint_name}")
+            return False
+        
+        #If we have a successful response
+        if response_dict["response_object"].status_code == 200:
+            logger.info(f"Health Check for Endpoint {ACS_Endpoint.endpoint_name} successful")
+            ACS_Endpoint.set_health(True)
+            await cls.append_endpoint(ACS_Endpoint)
+            return True
+        else:
+            logger.error(f"Failed to get Health for Endpoint {ACS_Endpoint.endpoint_name}")
+            return False
+ 
     @classmethod
-    async def append_policy_alertcount(cls,count,ACSPolicy:ACSPolicy) -> bool:
+    async def append_policy_alertcount(cls, count, policy: ACSPolicy) -> bool:
         """
         Append the Alert Count to the Policy
         """
         async with cls._lock:
             try:
-                ACSPolicy.violation_count = count
-                logger.debug(f"Alert Count for Policy {ACSPolicy.name} updated")
+                policy.violation_count = count
+                logger.debug(f"Alert Count for Policy {policy.name} updated")
             except:
                 logger.error(f"Error appending Alert Count for Policy {ACSPolicy.name} to the list")
                 return False
@@ -536,7 +624,7 @@ class ParsedMemory():
                         cluster.alerts.alerts.append(ACSAlert)
                         if alert_namespace_object is not None:
                             cluster.namespaces.namespaces.append(alert_namespace_object)
-                                     
+
                 if ACSAlert.policy is not None:
                     if ACSAlert.policy.id == ACSPolicy.id:
                         #No need to maintain 2 policy objects with the same information
@@ -591,7 +679,6 @@ log_file_path = path.join(path.dirname(path.abspath(__file__)), 'logging.conf')
 config.fileConfig(log_file_path, disable_existing_loggers=False)
 logger = getLogger("logger_root")
 
-
 async def write_output_file(file_path: str, content: str) -> None:
     """
     Write the content to a file
@@ -631,15 +718,15 @@ async def read_parse_acs_endpoints(endpoint_file) -> ACSEndpointList:
         logger.info("Exiting")
         return
     
-    async with async_open(endpoint_file, mode='r') as filehandle:
-        contents = await filehandle.read()
+    async with async_open(endpoint_file, mode='r') as endpoint_filehandler:
+        contents = await endpoint_filehandler.read()
         
     # Verify the JSON        
     try:
         result_endpoint_list=ACSEndpointList.model_validate_json(contents)
     except ValidationError as e:
         logger.error(f"Error: {e}")
-        logger.info("Ccontent from file is not valid json for ACSEndpointList")
+        logger.info("content from file is not valid json for ACSEndpointList")
             
     return result_endpoint_list
 
@@ -650,14 +737,26 @@ async def get_endpoint_policies(ACSEndpoint: ACSEndpoint) -> ACSPolicyList:
     
     logger.info("Getting Policies for ACS Endpoints")
     policies = ACSPolicyList(policies=[])
+    attempt = 0
+    retry_count = settings.api_retry_count
+    retry_delay = settings.api_read_retry_delay
+    response_dict = {"error_object": "Pre-Request Error", "response_object": None}
     
     headers={"Authorization": f"Bearer {ACSEndpoint.endpoint_token}",
              "Content-Type": "application/json"}
-    response_dict = await get_policy(ACSEndpoint.endpoint_url,ACSEndpoint.verify_endpoint_ssl,headers)
+    
+    while response_dict["error_object"] is not None and attempt < retry_count:
+        response_dict = await get_policy(ACSEndpoint.endpoint_client,ACSEndpoint.endpoint_url,ACSEndpoint.verify_endpoint_ssl,headers)
+        if response_dict["error_object"] is not None:
+            logger.error(f"Policy Data Not Retrieved for Endpoint {ACSEndpoint.endpoint_name}")
+            logger.error(f"Error: {response_dict['error_object']}")
+            await asyncio.sleep(retry_delay)
+            attempt += 1
+        else:
+            break
         
-    if "error_object" in response_dict and response_dict["error_object"] is not None:
-        logger.error(f"Policy Data Not Retrieved for Endpoint {ACSEndpoint.endpoint_name}")
-        logger.error(f"Error: {response_dict['error_object']}")
+    if attempt >= retry_count:
+        logger.error(f"Failed to get Policy Data for Endpoint {ACSEndpoint.endpoint_name}")
         return
         
     if response_dict["response_object"].status_code == 200:
@@ -691,7 +790,7 @@ async def update_endpoint_policy_alert_count(ACSEndpoint:ACSEndpoint,ACSPolicyLi
                  "Content-Type": "application/json"}
         params={"query": f"Policy:{policy.name}"}
         
-        response_dict = await get_alert_count(ACSEndpoint.endpoint_url,ACSEndpoint.verify_endpoint_ssl,headers,params)
+        response_dict = await get_alert_count(ACSEndpoint.endpoint_client,ACSEndpoint.endpoint_url,ACSEndpoint.verify_endpoint_ssl,headers,params)
         
         if "error_object" in response_dict and response_dict["error_object"] is not None:
             logger.error(f"Failed getting Alert count for {policy.name}")
@@ -720,17 +819,31 @@ async def get_alerts_for_policy(ACSEndpoint:ACSEndpoint,ACSPolicy:ACSPolicy) -> 
         ACSAlert: _description_
     """
     logger.debug(f"Getting alerts for policy {ACSPolicy.name}")
-    params={"query": f"Policy:{ACSPolicy.name}","pagination.limit": 100,"pagination.offset": 0,"pagination.total_expected_count": ACSPolicy.violation_count}
 
+    params={"query": f"Policy:{ACSPolicy.name}","pagination.limit": 100,"pagination.offset": 0,"pagination.total_expected_count": ACSPolicy.violation_count}
+    attempt = 0
+    retry_count = settings.api_retry_count
+    retry_delay = settings.api_read_retry_delay
+    parsed_alert_list = []
+    response_dict = {"error_object": "Pre-Request Error", "response_object": None}
+    
     headers={"Authorization": f"Bearer {ACSEndpoint.endpoint_token}",
                  "Content-Type": "application/json"}
     
-    parsed_alert_list = []
-    response_dict = await get_acs_alert(ACSEndpoint.endpoint_url,None,ACSEndpoint.verify_endpoint_ssl,headers,params)
-    if "error_object" in response_dict and response_dict["error_object"] is not None:
-        logger.error(f"Failed getting Alerts for Policy {ACSPolicy.name}")
-        logger.error(f"Error: {response_dict['error_object']}")
+    while response_dict["error_object"] is not None and attempt < retry_count:
+        response_dict = await get_acs_alert(ACSEndpoint.endpoint_client,ACSEndpoint.endpoint_url,None,ACSEndpoint.verify_endpoint_ssl,headers,params)
+        if response_dict["error_object"] is not None:
+            logger.error(f"Failed getting Alerts for Policy {ACSPolicy.name}")
+            logger.error(f"Error: {response_dict['error_object']}")
+            await asyncio.sleep(retry_delay)
+            attempt += 1
+        else:
+            break
+        
+    if attempt >= retry_count:
+        logger.error(f"Failed to get Alerts for Policy {ACSPolicy.name}")
         return
+    
     try:
         if hasattr(response_dict["response_object"], '__iter__'):
             for alert in response_dict["response_object"]:
@@ -748,7 +861,7 @@ async def get_alerts_for_policy(ACSEndpoint:ACSEndpoint,ACSPolicy:ACSPolicy) -> 
     
     for parsed_alert in parsed_alert_list:
         for alert in parsed_alert.alerts:
-            response_dict = await get_acs_alert(ACSEndpoint.endpoint_url,alert.id,ACSEndpoint.verify_endpoint_ssl,headers,params)
+            response_dict = await get_acs_alert(ACSEndpoint.endpoint_client,ACSEndpoint.endpoint_url,alert.id,ACSEndpoint.verify_endpoint_ssl,headers,params)
             if "error_object" in response_dict and response_dict["error_object"] is not None:
                 logger.error(f"Failed getting Alerts for Policy {ACSPolicy.name}")
                 logger.error(f"Error: {response_dict['error_object']}")
@@ -771,7 +884,7 @@ async def get_deployment_metadata_for_alert(alert:ACSAlert,ACSEndpoint:ACSEndpoi
         logger.debug(f"Deployment Information not available for Alert {alert.id}")
         return
     deployment_id = alert.deployment.id
-    response_dict = await get_acs_deployment(ACSEndpoint.endpoint_url,deployment_id,ACSEndpoint.verify_endpoint_ssl,headers,params=None)
+    response_dict = await get_acs_deployment(ACSEndpoint.endpoint_client,ACSEndpoint.endpoint_url,deployment_id,ACSEndpoint.verify_endpoint_ssl,headers,params=None)
     if "error_object" in response_dict and response_dict["error_object"] is not None:
         logger.error(f"Failed getting Alerts for Alert {alert.id}")
         logger.error(f"Error: {response_dict['error_object']}")
@@ -784,8 +897,8 @@ async def get_deployment_metadata_for_alert(alert:ACSAlert,ACSEndpoint:ACSEndpoi
         except ValidationError as e:
             logger.error(f"Error: {e}")
             return
-                                           
-async def continously_process_healthy_endpoints():
+
+async def continuously_process_healthy_endpoints():
     """
     Method is a continually running policy meant to process healthy endpoints
     """
@@ -811,7 +924,12 @@ async def continously_process_healthy_endpoints():
                     if await ParsedMemory.check_all_deployments_processed():
                         #All Deployments have been processed
                         logger.info("All Data has been processed")
-                        ParsedMemory.all_metadata_processed = True    
+                        ParsedMemory.all_metadata_processed = True
+                        try:
+                            for endpoint in ParsedMemory.endpoint_list.endpoints:
+                                await endpoint.endpoint_client.aclose()
+                        except:
+                            logger.error("Error closing endpoint clients")                           
                         break
 
         #Check if there are any healthy endpoints
@@ -863,63 +981,33 @@ async def generate_cluster_namespace_deployment_alert_output_file():
     """
     logger.info("Generating Output File for Cluster-Deployment-Namespace-Alerts-Relationship")
 
-    exclude_keys = {
+    include_keys = {
     "clusters": {
-        '__all__': {
-            "deployments" : True
-            ,"alerts": True
-            ,"namespaces": {
-                "namespaces":{
-                    '__all__': {
-                        "alerts": True
-                        ,"deployments":
-                            {"deployments":
-                                {"__all__":{
-                                    "annotations": True
-                                    ,"imagePullSecrets": True
-                                    ,"serviceAccount": True
-                                    ,"annotations": True
-                                    ,"created": True
-                                    ,"labels" : True
-                                    ,"tolerations": True
-                                    ,"ports": True
-                                    ,"inactive" : True
-                                    ,"priority" : True
-                                    ,"stateTimestamp": True
-                                    ,"alerts": {
-                                        "__all__": {
-                                            "deployment": True 
-                                            ,"policy": {
-                                                "lifecycleStages" : True
-                                                ,"notifiers" : True
-                                                
-                                            }
-                                            }
-                                    }
-                                    ,"containers" : {
-                                        "__all__": {
-                                            "config": True
-                                            ,"securityContext": True
-                                            ,"volumes": True
-                                            ,"secrets": True
-                                            ,"ports": True
-                                            ,"resources": True
-                                            ,"livenessProbe": True
-                                            ,"readinessProbe": True
-                                        }
-                                    }
-                                    }
-                                 }
-                                }
-                            }
-                    }
+        "__all__": {
+        "cluster_id": True
+        ,"cluster_name": True
+        ,"deployments": {
+            "deployments": {
+                "__all__": {
+                "name": True
+                ,"namespace": True
+                ,"riskScore": True
+                ,"alerts": {
+                    "__all__": {
+                    "id": True
+                    ,"violations": True
                 }
-            } 
-        },    
-}
+                }
+            }
+        }
+        }
+    }
+    }
+    }
+
     
     output_content = ParsedMemory.ocp_clusters.model_dump_json(
-        exclude=exclude_keys,exclude_none=True,indent=4)
+        include=include_keys,indent=4)
     
     output_file = path.join(settings.output_folder, 'cluster_namespace_deployment_alert_output_file.json')
     await write_output_file(output_file, output_content)
@@ -943,26 +1031,43 @@ async def generate_endpoint_policy_alert_count_output_file():
     output_content = ParsedMemory.endpoint_list.model_dump_json(include=include_keys,indent=4)
     output_file = path.join(settings.output_folder, 'endpoint_policy_alert_count_output_file.json')
     await write_output_file(output_file, output_content)
-           
+
+
+
 async def main():
     '''App Startup Function'''    
     logger.info("Starting up ACS API Correlation Service")
-  
+
     # Set Instance Hostname
     logger.info("Instance Hostname: {}".format(settings.instance_hostname))
-   
+
     # Load the ACS Endpoints
-    result_endpoint_list = await read_parse_acs_endpoints(settings.endpoint_list_json_path)
-    while result_endpoint_list is None:
-        logger.error("Error reading endpoint list file")
-        logger.info("Exiting")
+    logger.info("Reading Endpoint List")
+    endpoint_file_read_retry_count = settings.endpoint_file_read_retry_count
+    
+    while endpoint_file_read_retry_count > 0:
+        result_endpoint_list = await read_parse_acs_endpoints(settings.endpoint_list_json_path)
+        if result_endpoint_list is not None:
+            break
+        logger.info(f"Retrying to read endpoint list in {settings.endpoint_file_read_retry_delay} seconds")
+        await asyncio.sleep(settings.endpoint_file_read_retry_delay)        
+        endpoint_file_read_retry_count -= 1
+ 
+    if result_endpoint_list is None:
+        logger.error("Could not read any endpoints to poll, Application will exit")
         return
+    
     for endpoint in result_endpoint_list.endpoints:
+        if "http://" or "https://" not in endpoint.endpoint_url:
+            logger.error(f"Endpoint URL {endpoint.endpoint_url} is not valid, must start with http:// or https://")
+            logger.info("Will append https:// to the URL")
+            endpoint.endpoint_url = f"https://{endpoint.endpoint_url}"
+            
         await ParsedMemory.check_endpoint_valid_healthy(endpoint)                 
 
-    logger.debug("Starting up continously_process_healthy_endpoints for metadata")
-    asyncio.create_task(continously_process_healthy_endpoints())
-    logger.debug("Ending continously_process_healthy_endpoints for metadata")
+    logger.debug("Starting up continuously_process_healthy_endpoints for metadata")
+    asyncio.create_task(continuously_process_healthy_endpoints())
+    logger.debug("Ending continuously_process_healthy_endpoints for metadata")
     
     if await ParsedMemory.check_are_all_endpoints_unhealthy() and await ParsedMemory.get_endpoint_count() == 0:
         logger.error("No Healthy Endpoints to poll, Application will exit")
@@ -988,5 +1093,4 @@ if __name__ == '__main__':
     If there are no issues the main() function should return and end application after processing
     """
     asyncio.run(main())
- 
     
