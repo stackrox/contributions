@@ -4,6 +4,6 @@ RUN dnf install -y python pip
 
 RUN pip install flask
 
-COPY ping_server.py /ping_server.py
+COPY dynamic-connector.py /dynamic-connector.py
 
-CMD python /ping_server.py
+CMD python /dynamic-connector.py

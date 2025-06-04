@@ -5,9 +5,9 @@ metadata:
     deployment.kubernetes.io/revision: "1"
   generation: 1
   labels:
-    app: ping-server
-    name: ping-server
-  name: ping-server
+    app: dynamic-connector
+    name: dynamic-connector
+  name: dynamic-connector
   namespace: qa
 spec:
   minReadySeconds: 15
@@ -16,8 +16,8 @@ spec:
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: ping-server
-      name: ping-server
+      app: dynamic-connector
+      name: dynamic-connector
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -26,18 +26,18 @@ spec:
   template:
     metadata:
       labels:
-        app: ping-server
-        deployment: ping-server
-        name: ping-server
-      name: ping-server
+        app: dynamic-connector
+        deployment: dynamic-connector
+        name: dynamic-connector
+      name: dynamic-connector
       namespace: qa
     spec:
       imagePullSecrets:
         - name: qa
       containers:
-      - image: quay.io/jvirtane/ping-server:4.8.x-619-g1fb6d87786-dirty-4
+      - image: quay.io/jvirtane/dynamic-connector:4.8.x-909-gd5216e5572
         imagePullPolicy: IfNotPresent
-        name: external-destination-source
+        name: dynamic-connector
         resources: {}
         securityContext:
           capabilities: {}
