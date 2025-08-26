@@ -1,0 +1,62 @@
+{
+  "id": "74cfb824-2e65-46b7-b1b4-ba897e53af1f",
+  "name": "Ubuntu Package Manager in Image",
+  "description": "Alert on deployments with components of the Debian/Ubuntu package management system in the image.",
+  "rationale": "Package managers make it easier for attackers to use compromised containers, since they can easily add software.",
+  "remediation": "Run `dpkg -r --force-all apt apt-get && dpkg -r --force-all debconf dpkg` in the image build for production containers.",
+  "disabled": false,
+  "categories": [
+    "Security Best Practices"
+  ],
+  "lifecycleStages": [
+    "BUILD",
+    "DEPLOY"
+  ],
+  "eventSource": "NOT_APPLICABLE",
+  "exclusions": [
+    {
+      "name": "Don't alert on deployment csi-azurefile-node-win in kube-system namespace",
+      "deployment": {
+        "name": "csi-azurefile-node-win",
+        "scope": {
+          "cluster": "",
+          "namespace": "kube-system",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    }
+  ],
+  "scope": [],
+  "severity": "LOW_SEVERITY",
+  "enforcementActions": [],
+  "notifiers": [],
+  "lastUpdated": null,
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": false,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "",
+      "policyGroups": [
+        {
+          "fieldName": "Image Component",
+          "booleanOperator": "OR",
+          "negate": false,
+          "values": [
+            {
+              "value": "apt|dpkg="
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [],
+  "criteriaLocked": true,
+  "mitreVectorsLocked": true,
+  "isDefault": true,
+  "source": "IMPERATIVE"
+}

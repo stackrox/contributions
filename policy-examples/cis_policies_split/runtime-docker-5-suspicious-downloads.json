@@ -1,0 +1,63 @@
+{
+  "name": "CIS-Runtime-5 - Detect Suspicious File Downloads",
+  "description": "Runtime detection of file download activities that may indicate malware installation",
+  "rationale": "Unauthorized file downloads may indicate compromise",
+  "remediation": "Investigate download sources and implement network restrictions",
+  "disabled": false,
+  "categories": [
+    "File Download"
+  ],
+  "lifecycleStages": [
+    "RUNTIME"
+  ],
+  "eventSource": "DEPLOYMENT_EVENT",
+  "exclusions": [],
+  "scope": [],
+  "severity": "MEDIUM_SEVERITY",
+  "enforcementActions": [],
+  "notifiers": [],
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": false,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "Process Activity",
+      "policyGroups": [
+        {
+          "fieldName": "Process Name",
+          "booleanOperator": "OR",
+          "negate": false,
+          "values": [
+            {
+              "value": "wget"
+            },
+            {
+              "value": "curl"
+            },
+            {
+              "value": "ftp"
+            },
+            {
+              "value": "scp"
+            },
+            {
+              "value": "rsync"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [
+    {
+      "tactic": "TA0011",
+      "techniques": [
+        "T1105"
+      ]
+    }
+  ],
+  "criteriaLocked": false,
+  "mitreVectorsLocked": false,
+  "isDefault": false
+}

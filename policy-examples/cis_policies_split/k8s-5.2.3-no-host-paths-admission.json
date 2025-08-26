@@ -1,0 +1,53 @@
+{
+  "name": "CIS-K8s-5.2.3 - Minimize admission of containers with allowedHostPaths",
+  "description": "CIS Kubernetes Benchmark 5.2.3: Do not admit containers with dangerous volume types",
+  "rationale": "Certain volume types should not be allowed as they can expose sensitive host information",
+  "remediation": "Create policies that prevent containers from mounting dangerous volume types",
+  "disabled": false,
+  "categories": [
+    "Security Best Practices"
+  ],
+  "lifecycleStages": [
+    "DEPLOY"
+  ],
+  "eventSource": "NOT_APPLICABLE",
+  "exclusions": [],
+  "scope": [],
+  "severity": "HIGH_SEVERITY",
+  "enforcementActions": [
+    "FAIL_DEPLOYMENT"
+  ],
+  "notifiers": [],
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": true,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "Container Configuration",
+      "policyGroups": [
+        {
+          "fieldName": "Volume Type",
+          "booleanOperator": "OR",
+          "negate": false,
+          "values": [
+            {
+              "value": "HostPath"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [
+    {
+      "tactic": "TA0004",
+      "techniques": [
+        "T1611"
+      ]
+    }
+  ],
+  "criteriaLocked": false,
+  "mitreVectorsLocked": false,
+  "isDefault": false
+}

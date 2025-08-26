@@ -1,0 +1,53 @@
+{
+  "name": "CIS-Docker-5.8 - Ensure the host's user namespaces are not shared",
+  "description": "CIS Docker Benchmark 5.8: Ensure the host's user namespaces are not shared",
+  "rationale": "Sharing user namespaces can allow privilege escalation attacks",
+  "remediation": "Do not share the host's user namespace with containers",
+  "disabled": false,
+  "categories": [
+    "Security Best Practices"
+  ],
+  "lifecycleStages": [
+    "DEPLOY"
+  ],
+  "eventSource": "NOT_APPLICABLE",
+  "exclusions": [],
+  "scope": [],
+  "severity": "HIGH_SEVERITY",
+  "enforcementActions": [
+    "FAIL_DEPLOYMENT"
+  ],
+  "notifiers": [],
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": true,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "Container Configuration",
+      "policyGroups": [
+        {
+          "fieldName": "Image User",
+          "booleanOperator": "OR",
+          "negate": false,
+          "values": [
+            {
+              "value": "root"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [
+    {
+      "tactic": "TA0004",
+      "techniques": [
+        "T1548"
+      ]
+    }
+  ],
+  "criteriaLocked": false,
+  "mitreVectorsLocked": false,
+  "isDefault": false
+}

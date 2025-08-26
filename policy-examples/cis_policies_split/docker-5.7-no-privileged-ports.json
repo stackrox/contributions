@@ -1,0 +1,53 @@
+{
+  "name": "CIS-Docker-5.7 - Ensure privileged ports are not mapped",
+  "description": "CIS Docker Benchmark 5.7: Ensure privileged ports are not mapped within containers",
+  "rationale": "The TCP/IP port numbers below 1024 are considered privileged ports",
+  "remediation": "You should not map container ports to privileged host ports when starting a container",
+  "disabled": false,
+  "categories": [
+    "Security Best Practices"
+  ],
+  "lifecycleStages": [
+    "DEPLOY"
+  ],
+  "eventSource": "NOT_APPLICABLE",
+  "exclusions": [],
+  "scope": [],
+  "severity": "MEDIUM_SEVERITY",
+  "enforcementActions": [
+    "FAIL_DEPLOYMENT"
+  ],
+  "notifiers": [],
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": false,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "Container Configuration",
+      "policyGroups": [
+        {
+          "fieldName": "Exposed Port",
+          "booleanOperator": "OR",
+          "negate": false,
+          "values": [
+            {
+              "value": "<1024"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [
+    {
+      "tactic": "TA0008",
+      "techniques": [
+        "T1021"
+      ]
+    }
+  ],
+  "criteriaLocked": false,
+  "mitreVectorsLocked": false,
+  "isDefault": false
+}

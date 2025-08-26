@@ -1,0 +1,53 @@
+{
+  "name": "CIS-Docker-5.9 - Ensure the host's network namespace is not shared",
+  "description": "CIS Docker Benchmark 5.9: Ensure the host's network namespace is not shared",
+  "rationale": "Sharing the host network namespace provides the container full access to the host's network interfaces",
+  "remediation": "Do not use host network mode for containers",
+  "disabled": false,
+  "categories": [
+    "Security Best Practices"
+  ],
+  "lifecycleStages": [
+    "DEPLOY"
+  ],
+  "eventSource": "NOT_APPLICABLE",
+  "exclusions": [],
+  "scope": [],
+  "severity": "HIGH_SEVERITY",
+  "enforcementActions": [
+    "FAIL_DEPLOYMENT"
+  ],
+  "notifiers": [],
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": true,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "Container Configuration",
+      "policyGroups": [
+        {
+          "fieldName": "Host Network",
+          "booleanOperator": "OR",
+          "negate": false,
+          "values": [
+            {
+              "value": "true"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [
+    {
+      "tactic": "TA0004",
+      "techniques": [
+        "T1611"
+      ]
+    }
+  ],
+  "criteriaLocked": false,
+  "mitreVectorsLocked": false,
+  "isDefault": false
+}

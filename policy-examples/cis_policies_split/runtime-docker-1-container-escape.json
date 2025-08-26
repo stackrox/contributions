@@ -1,0 +1,62 @@
+{
+  "name": "CIS-Docker-Runtime-1 - Detect Container Escape Attempts",
+  "description": "Runtime detection of container escape attempts based on CIS Docker benchmarks",
+  "rationale": "Container escape attempts should be detected immediately",
+  "remediation": "Investigate escape attempts and strengthen container isolation",
+  "disabled": false,
+  "categories": [
+    "Container Escape"
+  ],
+  "lifecycleStages": [
+    "RUNTIME"
+  ],
+  "eventSource": "DEPLOYMENT_EVENT",
+  "exclusions": [],
+  "scope": [],
+  "severity": "CRITICAL_SEVERITY",
+  "enforcementActions": [
+    "KILL_POD_ENFORCEMENT"
+  ],
+  "notifiers": [],
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": true,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "Process Activity",
+      "policyGroups": [
+        {
+          "fieldName": "Process Name",
+          "booleanOperator": "OR",
+          "negate": false,
+          "values": [
+            {
+              "value": "runc"
+            },
+            {
+              "value": "docker"
+            },
+            {
+              "value": "containerd"
+            },
+            {
+              "value": "kubectl"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [
+    {
+      "tactic": "TA0004",
+      "techniques": [
+        "T1611"
+      ]
+    }
+  ],
+  "criteriaLocked": false,
+  "mitreVectorsLocked": false,
+  "isDefault": false
+}

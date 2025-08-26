@@ -1,0 +1,53 @@
+{
+  "name": "CIS-Docker-4.6 - Ensure HEALTHCHECK instruction has been added to container image",
+  "description": "CIS Docker Benchmark 4.6: Ensure HEALTHCHECK instruction has been added to container image",
+  "rationale": "Health checks help ensure containers are running properly and enable automated recovery",
+  "remediation": "Add HEALTHCHECK instruction to Dockerfiles to monitor container health",
+  "disabled": false,
+  "categories": [
+    "Security Best Practices"
+  ],
+  "lifecycleStages": [
+    "BUILD"
+  ],
+  "eventSource": "NOT_APPLICABLE",
+  "exclusions": [],
+  "scope": [],
+  "severity": "LOW_SEVERITY",
+  "enforcementActions": [
+    "FAIL_BUILD_ENFORCEMENT"
+  ],
+  "notifiers": [],
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": false,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "Image Configuration",
+      "policyGroups": [
+        {
+          "fieldName": "Dockerfile Instruction Keyword",
+          "booleanOperator": "OR",
+          "negate": true,
+          "values": [
+            {
+              "value": "HEALTHCHECK"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [
+    {
+      "tactic": "TA0040",
+      "techniques": [
+        "T1498"
+      ]
+    }
+  ],
+  "criteriaLocked": false,
+  "mitreVectorsLocked": false,
+  "isDefault": false
+}

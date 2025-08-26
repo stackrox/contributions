@@ -1,0 +1,962 @@
+{
+  "id": "dce17697-1b72-49d2-b18a-05d893cd9368",
+  "name": "Docker CIS 4.1: Ensure That a User for the Container Has Been Created",
+  "description": "Containers should run as a non-root user",
+  "rationale": "It is good practice to run the container as a non-root user, where possible. This can be done via the USER directive in the Dockerfile. You can exclude this policy from OpenShift clusters because they run containers using an arbitrarily assigned user ID by default.",
+  "remediation": "Ensure that the Dockerfile for each container switches from the root user",
+  "disabled": false,
+  "categories": [
+    "Docker Cis"
+  ],
+  "lifecycleStages": [
+    "BUILD",
+    "DEPLOY"
+  ],
+  "eventSource": "NOT_APPLICABLE",
+  "exclusions": [
+    {
+      "name": "Don't alert on deployment gcp-cloud-controller-manager in openshift-cloud-controller-manager namespace",
+      "deployment": {
+        "name": "gcp-cloud-controller-manager",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-cloud-controller-manager",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment haproxy-* in openshift-vsphere-infra namespace",
+      "deployment": {
+        "name": "haproxy-.*",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-vsphere-infra",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment keepalived-* in openshift-vsphere-infra namespace",
+      "deployment": {
+        "name": "keepalived-.*",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-vsphere-infra",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment coredns-* in openshift-vsphere-infra namespace",
+      "deployment": {
+        "name": "coredns-.*",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-vsphere-infra",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment splunk-forwarder-operator in openshift-splunk-forwarder-operator namespace",
+      "deployment": {
+        "name": "splunk-forwarder-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-splunk-forwarder-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment openshift-controller-manager-operator in openshift-controller-manager-operator namespace",
+      "deployment": {
+        "name": "openshift-controller-manager-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-controller-manager-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-backplane namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-backplane",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-multus namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-multus",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-ovn-kubernetes namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-ovn-kubernetes",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-image-registry namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-image-registry",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-controller-manager namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-controller-manager",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-machine-api namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-machine-api",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-cluster-storage-operator namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-cluster-storage-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-monitoring namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-monitoring",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-kube-scheduler namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-kube-scheduler",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-kube-controller-manager namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-kube-controller-manager",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment migrator in namespace openshift-kube-storage-version-migrator",
+      "deployment": {
+        "name": "migrator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-kube-storage-version-migrator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment insights-operator in namespace openshift-insights",
+      "deployment": {
+        "name": "insights-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-insights",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment oauth-openshift in namespace openshift-authentication",
+      "deployment": {
+        "name": "oauth-openshift",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-authentication",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment authentication-operator in namespace openshift-authentication-operator",
+      "deployment": {
+        "name": "authentication-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-authentication-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment downloads in namespace openshift-console",
+      "deployment": {
+        "name": "downloads",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-console",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment cloud-credential-operator in namespace openshift-cloud-credential-operator",
+      "deployment": {
+        "name": "cloud-credential-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-cloud-credential-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment pod-identity-webhook in namespace openshift-cloud-credential-operator",
+      "deployment": {
+        "name": "pod-identity-webhook",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-cloud-credential-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment network-operator in namespace openshift-network-operator",
+      "deployment": {
+        "name": "network-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-network-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment network-check-target in namespace openshift-network-diagnostics",
+      "deployment": {
+        "name": "network-check-target",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-network-diagnostics",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment network-check-source in namespace openshift-network-diagnostics",
+      "deployment": {
+        "name": "network-check-source",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-network-diagnostics",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment cluster-version-operator in namespace openshift-cluster-version",
+      "deployment": {
+        "name": "cluster-version-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-cluster-version",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment machine-approver in namespace openshift-cluster-machine-approver",
+      "deployment": {
+        "name": "machine-approver",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-cluster-machine-approver",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment kube-apiserver-operator in namespace openshift-kube-apiserver-operator",
+      "deployment": {
+        "name": "kube-apiserver-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-kube-apiserver-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment ingress-canary in namespace openshift-ingress-canary",
+      "deployment": {
+        "name": "ingress-canary",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-ingress-canary",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment ingress-operator in namespace openshift-ingress-operator",
+      "deployment": {
+        "name": "ingress-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-ingress-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment cluster-cloud-controller-manager-operator in namespace openshift-cloud-controller-manager-operator",
+      "deployment": {
+        "name": "cluster-cloud-controller-manager-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-cloud-controller-manager-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment blackbox-exporter in namespace openshift-route-monitor-operator",
+      "deployment": {
+        "name": "blackbox-exporter",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-route-monitor-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment thanos-ruler-user-workload in namespace openshift-user-workload-monitoring",
+      "deployment": {
+        "name": "thanos-ruler-user-workload",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-user-workload-monitoring",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment openshift-apiserver-operator in namespace openshift-apiserver-operator",
+      "deployment": {
+        "name": "openshift-apiserver-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-apiserver-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment etcd-operator in namespace openshift-etcd-operator",
+      "deployment": {
+        "name": "etcd-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-etcd-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment openshift-config-operator in namespace openshift-config-operator",
+      "deployment": {
+        "name": "openshift-config-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-config-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment kube-storage-version-migrator-operator in namespace openshift-kube-storage-version-migrator-operator",
+      "deployment": {
+        "name": "kube-storage-version-migrator-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-kube-storage-version-migrator-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment apiserver in namespace openshift-oauth-apiserver",
+      "deployment": {
+        "name": "apiserver",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-oauth-apiserver",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment cloud-network-config-controller in namespace openshift-cloud-network-config-controller",
+      "deployment": {
+        "name": "cloud-network-config-controller",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-cloud-network-config-controller",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment service-ca in namespace openshift-service-ca",
+      "deployment": {
+        "name": "service-ca",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-service-ca",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment service-ca-operator in namespace openshift-service-ca-operator",
+      "deployment": {
+        "name": "service-ca-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-service-ca-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment audit-exporter in namespace openshift-security",
+      "deployment": {
+        "name": "audit-exporter",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-security",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment route-controller-manager in namespace openshift-route-controller-manager",
+      "deployment": {
+        "name": "route-controller-manager",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-route-controller-manager",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on StackRox namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "stackrox",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on kube-system namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "kube-system",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-sdn namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-sdn",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-kube-apiserver namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-kube-apiserver",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-etcd namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-etcd",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-apiserver namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-apiserver",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-dns namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-dns",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-cluster-node-tuning-operator namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-cluster-node-tuning-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-cluster-csi-drivers namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-cluster-csi-drivers",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-machine-config-operator namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-machine-config-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment cluster-image-set-controller in namespace multicluster-engine",
+      "deployment": {
+        "name": "cluster-image-set-controller",
+        "scope": {
+          "cluster": "",
+          "namespace": "multicluster-engine",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment discovery-operator in namespace multicluster-engine",
+      "deployment": {
+        "name": "discovery-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "multicluster-engine",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment hive-clustersync in namespace hive",
+      "deployment": {
+        "name": "hive-clustersync",
+        "scope": {
+          "cluster": "",
+          "namespace": "hive",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment hive-controllers in namespace hive",
+      "deployment": {
+        "name": "hive-controllers",
+        "scope": {
+          "cluster": "",
+          "namespace": "hive",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment hive-operator in namespace multicluster-engine",
+      "deployment": {
+        "name": "hive-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "multicluster-engine",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment hiveadmission in namespace hive",
+      "deployment": {
+        "name": "hiveadmission",
+        "scope": {
+          "cluster": "",
+          "namespace": "hive",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment kube-controller-manager-operator in namespace openshift-kube-controller-manager-operator",
+      "deployment": {
+        "name": "kube-controller-manager-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-kube-controller-manager-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment openshift-kube-scheduler-operator in namespace openshift-kube-scheduler-operator",
+      "deployment": {
+        "name": "openshift-kube-scheduler-operator",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-kube-scheduler-operator",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on openshift-logging namespace",
+      "deployment": {
+        "name": "",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-logging",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment osd-patch-subscription-source in namespace openshift-marketplace",
+      "deployment": {
+        "name": "osd-patch-subscription-source",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-marketplace",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment osd-delete-ownerrefs-serviceaccounts in namespace openshift-backplane-srep",
+      "deployment": {
+        "name": "osd-delete-ownerrefs-serviceaccounts",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-backplane-srep",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment builds-pruner in namespace openshift-sre-pruning",
+      "deployment": {
+        "name": "builds-pruner",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-sre-pruning",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment deployments-pruner in namespace openshift-sre-pruning",
+      "deployment": {
+        "name": "deployments-pruner",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-sre-pruning",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment osd-delete-backplane-script-resources in namespace openshift-backplane-managed-scripts",
+      "deployment": {
+        "name": "osd-delete-backplane-script-resources",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-backplane-managed-scripts",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment network-node-identity in namespace openshift-network-node-identity",
+      "deployment": {
+        "name": "network-node-identity",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-network-node-identity",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    },
+    {
+      "name": "Don't alert on deployment aws-cloud-controller-manager in namespace openshift-cloud-controller-manager",
+      "deployment": {
+        "name": "aws-cloud-controller-manager",
+        "scope": {
+          "cluster": "",
+          "namespace": "openshift-cloud-controller-manager",
+          "label": null
+        }
+      },
+      "image": null,
+      "expiration": null
+    }
+  ],
+  "scope": [],
+  "severity": "LOW_SEVERITY",
+  "enforcementActions": [],
+  "notifiers": [],
+  "lastUpdated": null,
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": false,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "",
+      "policyGroups": [
+        {
+          "fieldName": "Image User",
+          "booleanOperator": "OR",
+          "negate": false,
+          "values": [
+            {
+              "value": "0"
+            },
+            {
+              "value": "root"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [],
+  "criteriaLocked": true,
+  "mitreVectorsLocked": true,
+  "isDefault": true,
+  "source": "IMPERATIVE"
+}

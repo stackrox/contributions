@@ -1,0 +1,74 @@
+{
+  "name": "CIS-K8s-Runtime-1 - Detect Unauthorized Process Execution",
+  "description": "Runtime detection of unauthorized processes in containers based on CIS Kubernetes benchmarks",
+  "rationale": "Containers should only run expected processes to minimize attack surface",
+  "remediation": "Investigate the source of unauthorized processes and update container configurations",
+  "disabled": false,
+  "categories": [
+    "Anomalous Activity"
+  ],
+  "lifecycleStages": [
+    "RUNTIME"
+  ],
+  "eventSource": "DEPLOYMENT_EVENT",
+  "exclusions": [],
+  "scope": [],
+  "severity": "HIGH_SEVERITY",
+  "enforcementActions": [
+    "KILL_POD_ENFORCEMENT"
+  ],
+  "notifiers": [],
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": true,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "Process Activity",
+      "policyGroups": [
+        {
+          "fieldName": "Process Name",
+          "booleanOperator": "OR",
+          "negate": false,
+          "values": [
+            {
+              "value": "/bin/sh"
+            },
+            {
+              "value": "/bin/bash"
+            },
+            {
+              "value": "/bin/dash"
+            },
+            {
+              "value": "nc"
+            },
+            {
+              "value": "netcat"
+            },
+            {
+              "value": "ncat"
+            },
+            {
+              "value": "telnet"
+            },
+            {
+              "value": "ssh"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [
+    {
+      "tactic": "TA0002",
+      "techniques": [
+        "T1059"
+      ]
+    }
+  ],
+  "criteriaLocked": false,
+  "mitreVectorsLocked": false,
+  "isDefault": false
+}

@@ -1,0 +1,53 @@
+{
+  "name": "CIS-Docker-5.10 - Ensure memory usage for container is limited",
+  "description": "CIS Docker Benchmark 5.10: Ensure memory usage for container is limited",
+  "rationale": "Memory limits prevent containers from consuming excessive memory and impacting host stability",
+  "remediation": "Set memory limits for all containers to prevent resource exhaustion",
+  "disabled": false,
+  "categories": [
+    "Security Best Practices"
+  ],
+  "lifecycleStages": [
+    "DEPLOY"
+  ],
+  "eventSource": "NOT_APPLICABLE",
+  "exclusions": [],
+  "scope": [],
+  "severity": "MEDIUM_SEVERITY",
+  "enforcementActions": [
+    "FAIL_DEPLOYMENT"
+  ],
+  "notifiers": [],
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": false,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "Container Configuration",
+      "policyGroups": [
+        {
+          "fieldName": "Memory Limit (MB)",
+          "booleanOperator": "OR",
+          "negate": true,
+          "values": [
+            {
+              "value": ".*"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [
+    {
+      "tactic": "TA0040",
+      "techniques": [
+        "T1496"
+      ]
+    }
+  ],
+  "criteriaLocked": false,
+  "mitreVectorsLocked": false,
+  "isDefault": false
+}

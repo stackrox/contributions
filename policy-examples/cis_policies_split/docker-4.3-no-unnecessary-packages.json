@@ -1,0 +1,62 @@
+{
+  "name": "CIS-Docker-4.3 - Ensure unnecessary packages are not installed",
+  "description": "CIS Docker Benchmark 4.3: Ensure unnecessary packages are not installed in container images",
+  "rationale": "Unnecessary packages increase attack surface and potential vulnerabilities",
+  "remediation": "Use minimal base images and avoid installing unnecessary packages",
+  "disabled": false,
+  "categories": [
+    "Security Best Practices"
+  ],
+  "lifecycleStages": [
+    "BUILD"
+  ],
+  "eventSource": "NOT_APPLICABLE",
+  "exclusions": [],
+  "scope": [],
+  "severity": "MEDIUM_SEVERITY",
+  "enforcementActions": [
+    "FAIL_BUILD_ENFORCEMENT"
+  ],
+  "notifiers": [],
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": false,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "Image Configuration",
+      "policyGroups": [
+        {
+          "fieldName": "Dockerfile Instruction Keyword",
+          "booleanOperator": "OR",
+          "negate": false,
+          "values": [
+            {
+              "value": "RUN.*apt.*install.*wget"
+            },
+            {
+              "value": "RUN.*yum.*install.*wget"
+            },
+            {
+              "value": "RUN.*apt.*install.*curl"
+            },
+            {
+              "value": "RUN.*yum.*install.*curl"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [
+    {
+      "tactic": "TA0001",
+      "techniques": [
+        "T1190"
+      ]
+    }
+  ],
+  "criteriaLocked": false,
+  "mitreVectorsLocked": false,
+  "isDefault": false
+}

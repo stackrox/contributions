@@ -1,0 +1,68 @@
+{
+  "name": "CIS-K8s-Runtime-2 - Detect Privilege Escalation Attempts",
+  "description": "Runtime detection of privilege escalation attempts based on CIS security practices",
+  "rationale": "Privilege escalation attempts should be detected and prevented in real-time",
+  "remediation": "Investigate the source of privilege escalation attempts and strengthen container security",
+  "disabled": false,
+  "categories": [
+    "Privilege Escalation"
+  ],
+  "lifecycleStages": [
+    "RUNTIME"
+  ],
+  "eventSource": "DEPLOYMENT_EVENT",
+  "exclusions": [],
+  "scope": [],
+  "severity": "HIGH_SEVERITY",
+  "enforcementActions": [
+    "KILL_POD_ENFORCEMENT"
+  ],
+  "notifiers": [],
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": true,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "Process Activity",
+      "policyGroups": [
+        {
+          "fieldName": "Process Name",
+          "booleanOperator": "OR",
+          "negate": false,
+          "values": [
+            {
+              "value": "sudo"
+            },
+            {
+              "value": "su"
+            },
+            {
+              "value": "passwd"
+            },
+            {
+              "value": "chroot"
+            },
+            {
+              "value": "mount"
+            },
+            {
+              "value": "umount"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [
+    {
+      "tactic": "TA0004",
+      "techniques": [
+        "T1548"
+      ]
+    }
+  ],
+  "criteriaLocked": false,
+  "mitreVectorsLocked": false,
+  "isDefault": false
+}

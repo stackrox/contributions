@@ -1,0 +1,53 @@
+{
+  "name": "CIS-Docker-5.2 - Ensure SELinux security options are set if applicable",
+  "description": "CIS Docker Benchmark 5.2: Ensure SELinux security options are set if applicable",
+  "rationale": "SELinux provides mandatory access control that can contain container compromises",
+  "remediation": "Enable and configure SELinux for containers when available",
+  "disabled": false,
+  "categories": [
+    "Security Best Practices"
+  ],
+  "lifecycleStages": [
+    "DEPLOY"
+  ],
+  "eventSource": "NOT_APPLICABLE",
+  "exclusions": [],
+  "scope": [],
+  "severity": "MEDIUM_SEVERITY",
+  "enforcementActions": [
+    "FAIL_DEPLOYMENT"
+  ],
+  "notifiers": [],
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": false,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "Container Configuration",
+      "policyGroups": [
+        {
+          "fieldName": "SELinux Options",
+          "booleanOperator": "OR",
+          "negate": true,
+          "values": [
+            {
+              "value": ".*"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [
+    {
+      "tactic": "TA0005",
+      "techniques": [
+        "T1562"
+      ]
+    }
+  ],
+  "criteriaLocked": false,
+  "mitreVectorsLocked": false,
+  "isDefault": false
+}

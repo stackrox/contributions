@@ -1,0 +1,53 @@
+{
+  "name": "CIS-Docker-5.1 - Ensure AppArmor Profile is Enabled",
+  "description": "CIS Docker Benchmark 5.1: Ensure that AppArmor Profile is enabled",
+  "rationale": "AppArmor is an effective and easy-to-use Linux application security system",
+  "remediation": "If AppArmor is applicable for your Linux OS, use it. You may have to follow below set of steps: 1. Verify if AppArmor is installed 2. Create or import a AppArmor profile for Docker containers 3. Put this profile in enforcing mode 4. Start your Docker container using the customized AppArmor profile",
+  "disabled": false,
+  "categories": [
+    "Security Best Practices"
+  ],
+  "lifecycleStages": [
+    "DEPLOY"
+  ],
+  "eventSource": "NOT_APPLICABLE",
+  "exclusions": [],
+  "scope": [],
+  "severity": "MEDIUM_SEVERITY",
+  "enforcementActions": [
+    "FAIL_DEPLOYMENT"
+  ],
+  "notifiers": [],
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": false,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "Container Configuration",
+      "policyGroups": [
+        {
+          "fieldName": "AppArmor Profile",
+          "booleanOperator": "OR",
+          "negate": false,
+          "values": [
+            {
+              "value": "unconfined"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [
+    {
+      "tactic": "TA0005",
+      "techniques": [
+        "T1562"
+      ]
+    }
+  ],
+  "criteriaLocked": false,
+  "mitreVectorsLocked": false,
+  "isDefault": false
+}

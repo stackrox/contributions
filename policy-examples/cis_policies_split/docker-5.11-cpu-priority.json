@@ -1,0 +1,53 @@
+{
+  "name": "CIS-Docker-5.11 - Ensure CPU priority is set appropriately on the container",
+  "description": "CIS Docker Benchmark 5.11: Ensure CPU priority is set appropriately on the container",
+  "rationale": "CPU limits prevent containers from consuming excessive CPU resources",
+  "remediation": "Set CPU limits and priorities for containers to ensure fair resource allocation",
+  "disabled": false,
+  "categories": [
+    "Security Best Practices"
+  ],
+  "lifecycleStages": [
+    "DEPLOY"
+  ],
+  "eventSource": "NOT_APPLICABLE",
+  "exclusions": [],
+  "scope": [],
+  "severity": "MEDIUM_SEVERITY",
+  "enforcementActions": [
+    "FAIL_DEPLOYMENT"
+  ],
+  "notifiers": [],
+  "SORTName": "",
+  "SORTLifecycleStage": "",
+  "SORTEnforcement": false,
+  "policyVersion": "1.1",
+  "policySections": [
+    {
+      "sectionName": "Container Configuration",
+      "policyGroups": [
+        {
+          "fieldName": "CPU Cores Limit",
+          "booleanOperator": "OR",
+          "negate": true,
+          "values": [
+            {
+              "value": ".*"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitreAttackVectors": [
+    {
+      "tactic": "TA0040",
+      "techniques": [
+        "T1496"
+      ]
+    }
+  ],
+  "criteriaLocked": false,
+  "mitreVectorsLocked": false,
+  "isDefault": false
+}
