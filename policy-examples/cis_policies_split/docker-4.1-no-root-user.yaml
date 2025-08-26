@@ -1,4 +1,4 @@
-apiVersion: security.stackrox.io/v1
+apiVersion: config.stackrox.io/v1alpha1
 kind: SecurityPolicy
 metadata:
   name: 4-1-ensure-image-is-not-running-as-root
@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: cis-policy
     app.kubernetes.io/part-of: security-policies
 spec:
-  name: CIS-Docker-4.1 - Ensure image is not running as root
+  policyName: CIS-Docker-4.1 - Ensure image is not running as root
   description: 'CIS Docker Benchmark 4.1: Ensure that a user for the container has been
     created'
   rationale: Running containers as root increases the risk of privilege escalation

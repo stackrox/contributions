@@ -1,4 +1,4 @@
-apiVersion: security.stackrox.io/v1
+apiVersion: config.stackrox.io/v1alpha1
 kind: SecurityPolicy
 metadata:
   name: 4-4-ensure-images-are-scanned-and-rebuilt-to-include-security-patches
@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: cis-policy
     app.kubernetes.io/part-of: security-policies
 spec:
-  name: CIS-Docker-4.4 - Ensure images are scanned and rebuilt to include security patches
+  policyName: CIS-Docker-4.4 - Ensure images are scanned and rebuilt to include security patches
   description: 'CIS Docker Benchmark 4.4: Ensure images are scanned and rebuilt to include
     security patches'
   rationale: Regular image scanning and rebuilding ensures security patches are applied

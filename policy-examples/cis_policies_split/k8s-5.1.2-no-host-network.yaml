@@ -1,4 +1,4 @@
-apiVersion: security.stackrox.io/v1
+apiVersion: config.stackrox.io/v1alpha1
 kind: SecurityPolicy
 metadata:
   name: 5-1-2-minimize-hostnetwork-usage
@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: cis-policy
     app.kubernetes.io/part-of: security-policies
 spec:
-  name: CIS-K8s-5.1.2 - Minimize hostNetwork Usage
+  policyName: CIS-K8s-5.1.2 - Minimize hostNetwork Usage
   description: 'CIS Kubernetes Benchmark 5.1.2: Ensure that Pod Security Policy forbids
     usage of hostNetwork'
   rationale: hostNetwork controls whether the pod may use the node network namespace

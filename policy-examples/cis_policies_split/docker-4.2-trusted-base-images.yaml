@@ -1,4 +1,4 @@
-apiVersion: security.stackrox.io/v1
+apiVersion: config.stackrox.io/v1alpha1
 kind: SecurityPolicy
 metadata:
   name: 4-2-ensure-that-containers-use-only-trusted-base-images
@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: cis-policy
     app.kubernetes.io/part-of: security-policies
 spec:
-  name: CIS-Docker-4.2 - Ensure that containers use only trusted base images
+  policyName: CIS-Docker-4.2 - Ensure that containers use only trusted base images
   description: 'CIS Docker Benchmark 4.2: Ensure that containers use only trusted base
     images'
   rationale: Using untrusted base images can introduce vulnerabilities and malicious

@@ -1,4 +1,4 @@
-apiVersion: security.stackrox.io/v1
+apiVersion: config.stackrox.io/v1alpha1
 kind: SecurityPolicy
 metadata:
   name: 5-1-ensure-apparmor-profile-is-enabled
@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: cis-policy
     app.kubernetes.io/part-of: security-policies
 spec:
-  name: CIS-Docker-5.1 - Ensure AppArmor Profile is Enabled
+  policyName: CIS-Docker-5.1 - Ensure AppArmor Profile is Enabled
   description: 'CIS Docker Benchmark 5.1: Ensure that AppArmor Profile is enabled'
   rationale: AppArmor is an effective and easy-to-use Linux application security system
   remediation: 'If AppArmor is applicable for your Linux OS, use it. You may have to

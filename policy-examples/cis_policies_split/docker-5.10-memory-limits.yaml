@@ -1,4 +1,4 @@
-apiVersion: security.stackrox.io/v1
+apiVersion: config.stackrox.io/v1alpha1
 kind: SecurityPolicy
 metadata:
   name: 5-10-ensure-memory-usage-for-container-is-limited
@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: cis-policy
     app.kubernetes.io/part-of: security-policies
 spec:
-  name: CIS-Docker-5.10 - Ensure memory usage for container is limited
+  policyName: CIS-Docker-5.10 - Ensure memory usage for container is limited
   description: 'CIS Docker Benchmark 5.10: Ensure memory usage for container is limited'
   rationale: Memory limits prevent containers from consuming excessive memory and impacting
     host stability

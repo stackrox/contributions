@@ -1,4 +1,4 @@
-apiVersion: security.stackrox.io/v1
+apiVersion: config.stackrox.io/v1alpha1
 kind: SecurityPolicy
 metadata:
   name: 5-2-3-minimize-admission-of-containers-with-allowedhostpaths
@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: cis-policy
     app.kubernetes.io/part-of: security-policies
 spec:
-  name: CIS-K8s-5.2.3 - Minimize admission of containers with allowedHostPaths
+  policyName: CIS-K8s-5.2.3 - Minimize admission of containers with allowedHostPaths
   description: 'CIS Kubernetes Benchmark 5.2.3: Do not admit containers with dangerous
     volume types'
   rationale: Certain volume types should not be allowed as they can expose sensitive

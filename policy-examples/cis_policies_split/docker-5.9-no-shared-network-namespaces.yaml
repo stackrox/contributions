@@ -1,4 +1,4 @@
-apiVersion: security.stackrox.io/v1
+apiVersion: config.stackrox.io/v1alpha1
 kind: SecurityPolicy
 metadata:
   name: 5-9-ensure-the-host-s-network-namespace-is-not-shared
@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: cis-policy
     app.kubernetes.io/part-of: security-policies
 spec:
-  name: CIS-Docker-5.9 - Ensure the host's network namespace is not shared
+  policyName: CIS-Docker-5.9 - Ensure the host's network namespace is not shared
   description: 'CIS Docker Benchmark 5.9: Ensure the host''s network namespace is not
     shared'
   rationale: Sharing the host network namespace provides the container full access to

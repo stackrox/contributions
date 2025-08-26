@@ -1,4 +1,4 @@
-apiVersion: security.stackrox.io/v1
+apiVersion: config.stackrox.io/v1alpha1
 kind: SecurityPolicy
 metadata:
   name: 5-7-ensure-privileged-ports-are-not-mapped
@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: cis-policy
     app.kubernetes.io/part-of: security-policies
 spec:
-  name: CIS-Docker-5.7 - Ensure privileged ports are not mapped
+  policyName: CIS-Docker-5.7 - Ensure privileged ports are not mapped
   description: 'CIS Docker Benchmark 5.7: Ensure privileged ports are not mapped within
     containers'
   rationale: The TCP/IP port numbers below 1024 are considered privileged ports

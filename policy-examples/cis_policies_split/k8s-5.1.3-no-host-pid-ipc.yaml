@@ -1,4 +1,4 @@
-apiVersion: security.stackrox.io/v1
+apiVersion: config.stackrox.io/v1alpha1
 kind: SecurityPolicy
 metadata:
   name: 5-1-3-minimize-hostpid-and-hostipc-usage
@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: cis-policy
     app.kubernetes.io/part-of: security-policies
 spec:
-  name: CIS-K8s-5.1.3 - Minimize hostPID and hostIPC Usage
+  policyName: CIS-K8s-5.1.3 - Minimize hostPID and hostIPC Usage
   description: 'CIS Kubernetes Benchmark 5.1.3: Ensure that Pod Security Policy forbids
     usage of hostPID and hostIPC'
   rationale: hostPID and hostIPC controls whether the pod containers can share the host

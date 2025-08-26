@@ -1,4 +1,4 @@
-apiVersion: security.stackrox.io/v1
+apiVersion: config.stackrox.io/v1alpha1
 kind: SecurityPolicy
 metadata:
   name: 5-2-ensure-selinux-security-options-are-set-if-applicable
@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: cis-policy
     app.kubernetes.io/part-of: security-policies
 spec:
-  name: CIS-Docker-5.2 - Ensure SELinux security options are set if applicable
+  policyName: CIS-Docker-5.2 - Ensure SELinux security options are set if applicable
   description: 'CIS Docker Benchmark 5.2: Ensure SELinux security options are set if
     applicable'
   rationale: SELinux provides mandatory access control that can contain container compromises

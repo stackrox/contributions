@@ -62,7 +62,7 @@ This directory contains CIS (Center for Internet Security) policy files converte
 All policy files now follow the proper Kubernetes API structure required for StackRox/Red Hat Advanced Cluster Security (RHACS):
 
 ```yaml
-apiVersion: security.stackrox.io/v1
+apiVersion: config.stackrox.io/v1alpha1
 kind: SecurityPolicy
 metadata:
   name: policy-name
@@ -71,7 +71,7 @@ metadata:
     app.kubernetes.io/part-of: security-policies
 spec:
   # Policy configuration details
-  name: CIS Policy Name
+  policyName: CIS Policy Name
   description: Policy description
   severity: HIGH_SEVERITY
   # ... other policy fields

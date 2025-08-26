@@ -1,4 +1,4 @@
-apiVersion: security.stackrox.io/v1
+apiVersion: config.stackrox.io/v1alpha1
 kind: SecurityPolicy
 metadata:
   name: runtime-3-detect-suspicious-network-tools
@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: cis-policy
     app.kubernetes.io/part-of: security-policies
 spec:
-  name: CIS-Docker-Runtime-3 - Detect Suspicious Network Tools
+  policyName: CIS-Docker-Runtime-3 - Detect Suspicious Network Tools
   description: Runtime detection of network reconnaissance and attack tools
   rationale: Network attack tools indicate potential malicious activity
   remediation: Investigate the source and purpose of network tools
