@@ -22,7 +22,6 @@ spec:
   severity: MEDIUM_SEVERITY
   enforcementActions:
   - FAIL_BUILD_ENFORCEMENT
-  notifiers: []
   SORTName: ''
   SORTLifecycleStage: ''
   SORTEnforcement: false

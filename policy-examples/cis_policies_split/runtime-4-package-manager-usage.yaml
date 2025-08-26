@@ -22,7 +22,7 @@ spec:
   scope: []
   severity: MEDIUM_SEVERITY
   enforcementActions: []
-  notifiers: []
+  - SCALE_TO_ZERO_ENFORCEMENT
   SORTName: ''
   SORTLifecycleStage: ''
   SORTEnforcement: false

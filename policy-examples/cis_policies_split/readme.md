@@ -74,8 +74,20 @@ spec:
   policyName: CIS Policy Name
   description: Policy description
   severity: HIGH_SEVERITY
+  lifecycleStages: [BUILD, DEPLOY]  # or just BUILD or just DEPLOY
+  enforcementActions:
+    - FAIL_BUILD_ENFORCEMENT        # For BUILD policies
+    - SCALE_TO_ZERO_ENFORCEMENT    # For DEPLOY policies
   # ... other policy fields
 ```
+
+## Enforcement Actions
+
+The policies are configured with appropriate enforcement actions based on their lifecycle stages:
+
+- **Build and Deploy policies**: Use both `FAIL_BUILD_ENFORCEMENT` and `SCALE_TO_ZERO_ENFORCEMENT`
+- **Build only policies**: Use only `FAIL_BUILD_ENFORCEMENT`
+- **Deploy only policies**: Use only `SCALE_TO_ZERO_ENFORCEMENT`
 
 ## Usage
 

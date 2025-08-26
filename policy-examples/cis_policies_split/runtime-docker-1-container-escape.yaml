@@ -20,8 +20,7 @@ spec:
   scope: []
   severity: CRITICAL_SEVERITY
   enforcementActions:
-  - KILL_POD_ENFORCEMENT
-  notifiers: []
+  - SCALE_TO_ZERO_ENFORCEMENT
   SORTName: ''
   SORTLifecycleStage: ''
   SORTEnforcement: true

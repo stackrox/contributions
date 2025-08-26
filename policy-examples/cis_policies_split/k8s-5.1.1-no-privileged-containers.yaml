@@ -22,7 +22,7 @@ spec:
   scope: []
   severity: HIGH_SEVERITY
   enforcementActions:
-  - FAIL_DEPLOYMENT
+  - FAIL_DEPLOYMENT_CREATE_ENFORCEMENT
   notifiers: []
   SORTName: ''
   SORTLifecycleStage: ''
