@@ -1,0 +1,50 @@
+apiVersion: security.stackrox.io/v1
+kind: SecurityPolicy
+metadata:
+  name: resource-limits-ensure-cpu-and-memory-limits-are-set
+  labels:
+    app.kubernetes.io/name: cis-policy
+    app.kubernetes.io/part-of: security-policies
+spec:
+  name: CIS-K8s-Resource-Limits - Ensure CPU and Memory limits are set
+  description: Ensure that CPU and memory limits are set for containers to prevent resource
+    exhaustion
+  rationale: Resource limits prevent containers from consuming excessive resources and
+    impacting other workloads
+  remediation: Set CPU and memory limits for all containers
+  disabled: false
+  categories:
+  - Security Best Practices
+  lifecycleStages:
+  - DEPLOY
+  eventSource: NOT_APPLICABLE
+  exclusions: []
+  scope: []
+  severity: MEDIUM_SEVERITY
+  enforcementActions:
+  - FAIL_DEPLOYMENT
+  notifiers: []
+  SORTName: ''
+  SORTLifecycleStage: ''
+  SORTEnforcement: false
+  policyVersion: '1.1'
+  policySections:
+  - sectionName: Container Configuration
+    policyGroups:
+    - fieldName: CPU Cores Limit
+      booleanOperator: OR
+      negate: true
+      values:
+      - value: .*
+    - fieldName: Memory Limit (MB)
+      booleanOperator: OR
+      negate: true
+      values:
+      - value: .*
+  mitreAttackVectors:
+  - tactic: TA0040
+    techniques:
+    - T1496
+  criteriaLocked: false
+  mitreVectorsLocked: false
+  isDefault: false

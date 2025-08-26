@@ -1,0 +1,45 @@
+apiVersion: security.stackrox.io/v1
+kind: SecurityPolicy
+metadata:
+  name: 5-1-5-minimize-root-containers
+  labels:
+    app.kubernetes.io/name: cis-policy
+    app.kubernetes.io/part-of: security-policies
+spec:
+  name: CIS-K8s-5.1.5 - Minimize Root Containers
+  description: 'CIS Kubernetes Benchmark 5.1.5: Ensure that Pod Security Policy forbids
+    running containers as root'
+  rationale: Containers should not run as root user to minimize privilege escalation
+    risks
+  remediation: 'Create a Pod Security Policy that requires runAsNonRoot: true'
+  disabled: false
+  categories:
+  - Security Best Practices
+  lifecycleStages:
+  - DEPLOY
+  eventSource: NOT_APPLICABLE
+  exclusions: []
+  scope: []
+  severity: HIGH_SEVERITY
+  enforcementActions:
+  - FAIL_DEPLOYMENT
+  notifiers: []
+  SORTName: ''
+  SORTLifecycleStage: ''
+  SORTEnforcement: true
+  policyVersion: '1.1'
+  policySections:
+  - sectionName: Container Configuration
+    policyGroups:
+    - fieldName: Image User
+      booleanOperator: OR
+      negate: false
+      values:
+      - value: root
+  mitreAttackVectors:
+  - tactic: TA0004
+    techniques:
+    - T1548
+  criteriaLocked: false
+  mitreVectorsLocked: false
+  isDefault: false

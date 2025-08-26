@@ -1,0 +1,50 @@
+apiVersion: security.stackrox.io/v1
+kind: SecurityPolicy
+metadata:
+  name: 5-1-3-minimize-hostpid-and-hostipc-usage
+  labels:
+    app.kubernetes.io/name: cis-policy
+    app.kubernetes.io/part-of: security-policies
+spec:
+  name: CIS-K8s-5.1.3 - Minimize hostPID and hostIPC Usage
+  description: 'CIS Kubernetes Benchmark 5.1.3: Ensure that Pod Security Policy forbids
+    usage of hostPID and hostIPC'
+  rationale: hostPID and hostIPC controls whether the pod containers can share the host
+    process ID namespace
+  remediation: 'Create a Pod Security Policy that sets hostPID: false and hostIPC: false'
+  disabled: false
+  categories:
+  - Security Best Practices
+  lifecycleStages:
+  - DEPLOY
+  eventSource: NOT_APPLICABLE
+  exclusions: []
+  scope: []
+  severity: HIGH_SEVERITY
+  enforcementActions:
+  - FAIL_DEPLOYMENT
+  notifiers: []
+  SORTName: ''
+  SORTLifecycleStage: ''
+  SORTEnforcement: true
+  policyVersion: '1.1'
+  policySections:
+  - sectionName: Container Configuration
+    policyGroups:
+    - fieldName: Host PID
+      booleanOperator: OR
+      negate: false
+      values:
+      - value: 'true'
+    - fieldName: Host IPC
+      booleanOperator: OR
+      negate: false
+      values:
+      - value: 'true'
+  mitreAttackVectors:
+  - tactic: TA0004
+    techniques:
+    - T1611
+  criteriaLocked: false
+  mitreVectorsLocked: false
+  isDefault: false

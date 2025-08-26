@@ -1,0 +1,45 @@
+apiVersion: security.stackrox.io/v1
+kind: SecurityPolicy
+metadata:
+  name: 4-1-ensure-image-is-not-running-as-root
+  labels:
+    app.kubernetes.io/name: cis-policy
+    app.kubernetes.io/part-of: security-policies
+spec:
+  name: CIS-Docker-4.1 - Ensure image is not running as root
+  description: 'CIS Docker Benchmark 4.1: Ensure that a user for the container has been
+    created'
+  rationale: Running containers as root increases the risk of privilege escalation
+  remediation: Ensure that the Dockerfile for the container image contains a USER instruction
+    to run the container as a non-root user
+  disabled: false
+  categories:
+  - Security Best Practices
+  lifecycleStages:
+  - DEPLOY
+  eventSource: NOT_APPLICABLE
+  exclusions: []
+  scope: []
+  severity: HIGH_SEVERITY
+  enforcementActions:
+  - FAIL_DEPLOYMENT
+  notifiers: []
+  SORTName: ''
+  SORTLifecycleStage: ''
+  SORTEnforcement: true
+  policyVersion: '1.1'
+  policySections:
+  - sectionName: Container Configuration
+    policyGroups:
+    - fieldName: Image User
+      booleanOperator: OR
+      negate: false
+      values:
+      - value: root
+  mitreAttackVectors:
+  - tactic: TA0004
+    techniques:
+    - T1548
+  criteriaLocked: false
+  mitreVectorsLocked: false
+  isDefault: false

@@ -1,0 +1,48 @@
+apiVersion: security.stackrox.io/v1
+kind: SecurityPolicy
+metadata:
+  name: runtime-3-detect-unauthorized-network-connections
+  labels:
+    app.kubernetes.io/name: cis-policy
+    app.kubernetes.io/part-of: security-policies
+spec:
+  name: CIS-K8s-Runtime-3 - Detect Unauthorized Network Connections
+  description: Runtime detection of unauthorized outbound network connections via network
+    tools
+  rationale: Containers should only establish expected network connections
+  remediation: Review and restrict container network policies and remove network tools
+  disabled: false
+  categories:
+  - Network Activity
+  lifecycleStages:
+  - RUNTIME
+  eventSource: DEPLOYMENT_EVENT
+  exclusions: []
+  scope: []
+  severity: MEDIUM_SEVERITY
+  enforcementActions: []
+  notifiers: []
+  SORTName: ''
+  SORTLifecycleStage: ''
+  SORTEnforcement: false
+  policyVersion: '1.1'
+  policySections:
+  - sectionName: Process Activity
+    policyGroups:
+    - fieldName: Process Name
+      booleanOperator: OR
+      negate: false
+      values:
+      - value: nc
+      - value: netcat
+      - value: ncat
+      - value: socat
+      - value: telnet
+      - value: ssh
+  mitreAttackVectors:
+  - tactic: TA0011
+    techniques:
+    - T1071
+  criteriaLocked: false
+  mitreVectorsLocked: false
+  isDefault: false

@@ -1,0 +1,44 @@
+apiVersion: security.stackrox.io/v1
+kind: SecurityPolicy
+metadata:
+  name: 5-1-2-minimize-hostnetwork-usage
+  labels:
+    app.kubernetes.io/name: cis-policy
+    app.kubernetes.io/part-of: security-policies
+spec:
+  name: CIS-K8s-5.1.2 - Minimize hostNetwork Usage
+  description: 'CIS Kubernetes Benchmark 5.1.2: Ensure that Pod Security Policy forbids
+    usage of hostNetwork'
+  rationale: hostNetwork controls whether the pod may use the node network namespace
+  remediation: 'Create a Pod Security Policy that sets hostNetwork: false'
+  disabled: false
+  categories:
+  - Security Best Practices
+  lifecycleStages:
+  - DEPLOY
+  eventSource: NOT_APPLICABLE
+  exclusions: []
+  scope: []
+  severity: HIGH_SEVERITY
+  enforcementActions:
+  - FAIL_DEPLOYMENT
+  notifiers: []
+  SORTName: ''
+  SORTLifecycleStage: ''
+  SORTEnforcement: true
+  policyVersion: '1.1'
+  policySections:
+  - sectionName: Container Configuration
+    policyGroups:
+    - fieldName: Host Network
+      booleanOperator: OR
+      negate: false
+      values:
+      - value: 'true'
+  mitreAttackVectors:
+  - tactic: TA0004
+    techniques:
+    - T1611
+  criteriaLocked: false
+  mitreVectorsLocked: false
+  isDefault: false

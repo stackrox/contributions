@@ -1,0 +1,55 @@
+apiVersion: security.stackrox.io/v1
+kind: SecurityPolicy
+metadata:
+  name: runtime-4-detect-file-system-modifications-in-read-only-areas
+  labels:
+    app.kubernetes.io/name: cis-policy
+    app.kubernetes.io/part-of: security-policies
+spec:
+  name: CIS-K8s-Runtime-4 - Detect File System Modifications in Read-Only Areas
+  description: Runtime detection of file modifications in areas that should be read-only
+  rationale: Unauthorized file modifications may indicate compromise
+  remediation: Investigate file modification attempts and strengthen file system protections
+  disabled: false
+  categories:
+  - System Modification
+  lifecycleStages:
+  - RUNTIME
+  eventSource: DEPLOYMENT_EVENT
+  exclusions: []
+  scope: []
+  severity: HIGH_SEVERITY
+  enforcementActions:
+  - KILL_POD_ENFORCEMENT
+  notifiers: []
+  SORTName: ''
+  SORTLifecycleStage: ''
+  SORTEnforcement: true
+  policyVersion: '1.1'
+  policySections:
+  - sectionName: Process Activity
+    policyGroups:
+    - fieldName: Process Arguments
+      booleanOperator: OR
+      negate: false
+      values:
+      - value: .*/etc/.*
+      - value: .*/usr/.*
+      - value: .*/bin/.*
+      - value: .*/sbin/.*
+    - fieldName: Process Name
+      booleanOperator: OR
+      negate: false
+      values:
+      - value: rm
+      - value: mv
+      - value: cp
+      - value: chmod
+      - value: chown
+  mitreAttackVectors:
+  - tactic: TA0005
+    techniques:
+    - T1222
+  criteriaLocked: false
+  mitreVectorsLocked: false
+  isDefault: false

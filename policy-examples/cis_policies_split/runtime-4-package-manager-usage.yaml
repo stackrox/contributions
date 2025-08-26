@@ -1,0 +1,51 @@
+apiVersion: security.stackrox.io/v1
+kind: SecurityPolicy
+metadata:
+  name: 4-detect-package-manager-usage
+  labels:
+    app.kubernetes.io/name: cis-policy
+    app.kubernetes.io/part-of: security-policies
+spec:
+  name: CIS-Runtime-4 - Detect Package Manager Usage
+  description: Runtime detection of package manager usage which may indicate unauthorized
+    software installation
+  rationale: Package managers should not be used in production containers
+  remediation: Investigate package installation attempts and remove package managers
+    from production images
+  disabled: false
+  categories:
+  - Package Management
+  lifecycleStages:
+  - RUNTIME
+  eventSource: DEPLOYMENT_EVENT
+  exclusions: []
+  scope: []
+  severity: MEDIUM_SEVERITY
+  enforcementActions: []
+  notifiers: []
+  SORTName: ''
+  SORTLifecycleStage: ''
+  SORTEnforcement: false
+  policyVersion: '1.1'
+  policySections:
+  - sectionName: Process Activity
+    policyGroups:
+    - fieldName: Process Name
+      booleanOperator: OR
+      negate: false
+      values:
+      - value: apt
+      - value: apt-get
+      - value: yum
+      - value: dnf
+      - value: apk
+      - value: pip
+      - value: npm
+      - value: gem
+  mitreAttackVectors:
+  - tactic: TA0003
+    techniques:
+    - T1505
+  criteriaLocked: false
+  mitreVectorsLocked: false
+  isDefault: false
