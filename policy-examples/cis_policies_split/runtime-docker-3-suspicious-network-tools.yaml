@@ -20,7 +20,7 @@ spec:
   scope: []
   severity: HIGH_SEVERITY
   enforcementActions:
-  - SCALE_TO_ZERO_ENFORCEMENT
+  - KILL_POD_ENFORCEMENT
   SORTName: ''
   SORTLifecycleStage: ''
   SORTEnforcement: true
