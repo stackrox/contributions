@@ -21,8 +21,8 @@ spec:
   exclusions: []
   scope: []
   severity: MEDIUM_SEVERITY
-  enforcementActions: []
-  - KILL_POD_ENFORCEMENT
+  enforcementActions:
+    - KILL_POD_ENFORCEMENT
   SORTName: ''
   SORTLifecycleStage: ''
   SORTEnforcement: false
