@@ -1,0 +1,56 @@
+apiVersion: config.stackrox.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: high-risk-npm-packages-2025
+  labels:
+    app.kubernetes.io/name: vulnerability-management
+    app.kubernetes.io/part-of: security-policies
+spec:
+  policyName: High Risk NPM Packages (2025)
+  description: Alert on deployments with high Vulnerabilities
+  rationale: This policy checks packages that are highly vulnerable
+  remediation: Use your package manager's "remove", "purge" or "erase" command to remove vulnerable packages from the image build for production containers. Ensure that any configuration files are also removed.
+  disabled: false
+  categories:
+    - Vulnerability Management
+  lifecycleStages:
+    - BUILD
+    - DEPLOY
+  eventSource: NOT_APPLICABLE
+  exclusions: []
+  scope: []
+  severity: MEDIUM_SEVERITY
+  enforcementActions: []
+  SORTName: ''
+  SORTLifecycleStage: ''
+  SORTEnforcement: false
+  policyVersion: '1.1'
+  policySections:
+    - sectionName: ''
+      policyGroups:
+        - fieldName: Image Component
+          booleanOperator: OR
+          negate: false
+          values:
+            - value: ansi-styles=6.2.2
+            - value: debug=4.4.2
+            - value: chalk=5.6.1
+            - value: supports-color=10.2.1
+            - value: strip-ansi=7.1.1
+            - value: ansi-regex=6.2.1
+            - value: wrap-ansi=9.0.1
+            - value: color-convert=3.1.1
+            - value: color-name=2.0.1
+            - value: is-arrayish=0.3.3
+            - value: slice-ansi=7.1.1
+            - value: color=5.0.1
+            - value: color-string=2.1.1
+            - value: simple-swizzle=0.2.3
+            - value: supports-hyperlinks=4.1.1
+            - value: has-ansi=6.0.1
+            - value: chalk-template=1.1.1
+            - value: backslash=0.2.1
+  mitreAttackVectors: []
+  criteriaLocked: false
+  mitreVectorsLocked: false
+  isDefault: false
