@@ -1,0 +1,52 @@
+apiVersion: config.stackrox.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: sensitive-env-vars-with-argocd-exclusion
+  labels:
+    app.kubernetes.io/name: cis-policy
+    app.kubernetes.io/part-of: security-policies
+spec:
+  policyName: Sensitive Environment Variables with ArgoCD Secret Exclusion
+  description: 'Alerts on deployments using environment variables with keys ''PASSWORD'' or ''SECRET'', while specifically excluding a known ArgoCD secret path. This policy aims to flag other sensitive secrets or passwords, but ignore the managed ArgoCD secret.'
+  rationale: 'Exposure of sensitive credentials via environment variables is a security risk. This policy aims to mitigate that risk while allowing a specific, known ArgoCD secret, which is presumed to be securely managed, to exist without triggering alerts.'
+  remediation: 'Review environment variables of violating deployments. Remove sensitive data like passwords or secrets. If a secret is necessary, ensure it''s mounted as a volume from a Kubernetes Secret and not exposed as an environment variable, or use appropriate secret management tools.'
+  disabled: false
+  categories:
+    - Security Best Practices
+    - Sensitive Data
+  lifecycleStages:
+    - DEPLOY
+  eventSource: NOT_APPLICABLE
+  exclusions: []
+  scope: []
+  severity: HIGH_SEVERITY
+  enforcementActions:
+    - SCALE_TO_ZERO_ENFORCEMENT
+  SORTName: ''
+  SORTLifecycleStage: ''
+  SORTEnforcement: true
+  policyVersion: '1.0'
+  policySections:
+    - sectionName: Detect Sensitive Environment Variables with Exclusion
+      policyGroups:
+        - fieldName: Environment Variable
+          booleanOperator: OR
+          negate: false
+          values:
+            - value: PASSWORD=.*
+            - value: SECRET=.*
+        - fieldName: Environment Variable
+          booleanOperator: OR
+          negate: true
+          values:
+            - value: SECRET=/secret/data/app/argocd/secret
+  mitreAttackVectors:
+    - tactic: TA0006
+      techniques:
+        - T1552.007
+    - tactic: TA0007
+      techniques:
+        - T1613
+  criteriaLocked: false
+  mitreVectorsLocked: false
+  isDefault: false
