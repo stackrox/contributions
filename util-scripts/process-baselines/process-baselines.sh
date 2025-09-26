@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eoux pipefail
+set -eou pipefail
 
 if [[ -z "${ROX_ENDPOINT}" ]]; then
 	echo >&2 "ROX_ENDPOINT must be set"
@@ -16,7 +16,10 @@ deploymentname_value=NA
 namespace_value=NA
 clustername_value=NA
 clusterid_value=NA
-lock=NA
+created_value=NA
+lock_value=NA
+
+nset=0
 
 process_arg() {
     arg=$1
@@ -26,23 +29,46 @@ process_arg() {
      
     if [[ "$key" == "deployment" ]]; then
         deployment_value="$value"
+        nset=$((nset + 1))
+        return 0
     elif [[ "$key" == "deploymentname" ]]; then
         deploymentname_value="$value"
+        nset=$((nset + 1))
+        return 0
     elif [[ "$key" == "namespace" ]]; then
 	namespace_value="$value"
+        nset=$((nset + 1))
+        return 0
     elif [[ "$key" == "clustername" ]]; then
 	clustername_value="$value"
+        nset=$((nset + 1))
+        return 0
     elif [[ "$key" == "clusterid" ]]; then
 	clusterid_value="$value"
+        nset=$((nset + 1))
+        return 0
+    elif [[ "$key" == "created" ]]; then
+        created_value="$value"
+        nset=$((nset + 1))
+        return 0
     elif [[ "$key" == "lock" ]]; then
+        # nset represents the number of options set other than lock
 	lock_value="$value"
+        return 0
     fi
+
+    echo "Warning: Unknown option $key"
 }
 
 process_args() {
     for arg in "$@"; do
         process_arg "$arg"
     done
+
+    if [[ "$nset" == 0 ]]; then
+        echo "Must set at least one option other than lock"
+        exit 1
+    fi
 }
 
 get_process_baselines() {
@@ -59,10 +85,13 @@ get_process_baselines() {
     	json_deployments_with_processes="$(echo "$json_deployments_with_processes" | jq --arg deployment "$deployment_value" '{deployments: [.deployments[] | select(.deployment.id == $deployment)]}')"
     fi
     if [[ "$clustername_value" != "NA" ]]; then
-    	json_deployments_with_processes="$(echo "$json_deployments_with_processes" | jq --arg cluster "$cluster_value" '{deployments: [.deployments[] | select(.deployment.cluster == $cluster)]}')"
+        json_deployments_with_processes="$(echo "$json_deployments_with_processes" | jq --arg cluster "$clustername_value" '{deployments: [.deployments[] | select(.deployment.cluster == $cluster)]}')"
     fi
     if [[ "$clusterid_value" != "NA" ]]; then
     	json_deployments_with_processes="$(echo "$json_deployments_with_processes" | jq --arg clusterid "$clusterid_value" '{deployments: [.deployments[] | select(.deployment.clusterid == $cluster_id)]}')"
+    fi
+    if [[ "$created_value" != "NA" ]]; then
+        json_deployments_with_processes="$(echo "$json_deployments_with_processes" | jq --arg created "$created_value" '{deployments: [.deployments[] | select(.deployment.created > $created)]}')"
     fi
 
     echo "$json_deployments_with_processes" | jq
@@ -86,11 +115,14 @@ keys_to_lock_query() {
 
 process_args $@
 
+if [[ "$lock_value" == "NA" ]]; then
+    echo "Must specify a value for lock. It must be either true or false"
+    exit 1
+fi
+
 json_deployments_with_processes="$(get_process_baselines)"
 keys="$(get_keys_from_deployments_with_process_info "$json_deployments_with_processes")"
 query="$(keys_to_lock_query "$keys")"
-
-#echo "$keys" | jq
 
 tmpfile=$(mktemp)
 echo "$query" > "$tmpfile"
