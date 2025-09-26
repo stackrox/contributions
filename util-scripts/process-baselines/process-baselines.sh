@@ -72,29 +72,52 @@ process_args() {
 }
 
 get_process_baselines() {
+    local offset=0
+    local limit=1000
+    local all_deployments="[]"
     local json_deployments_with_processes
-    json_deployments_with_processes="$(curl --location --silent --request GET "https://${ROX_ENDPOINT}/v1/deploymentswithprocessinfo" -k -H "Authorization: Bearer $ROX_API_TOKEN")"
+    local current_page_deployments
+    local current_page_count
+
+    while true; do
+        json_deployments_with_processes="$(curl --location --silent --request GET "https://${ROX_ENDPOINT}/v1/deploymentswithprocessinfo?pagination.offset=${offset}&pagination.limit=${limit}" -k -H "Authorization: Bearer $ROX_API_TOKEN")"
+
+        current_page_deployments="$(echo "$json_deployments_with_processes" | jq '.deployments')"
+
+        current_page_count="$(echo "$current_page_deployments" | jq 'length')"
+
+        if [[ "$current_page_count" -gt 0 ]]; then
+            all_deployments="$(echo "$all_deployments" | jq --argjson new_items "$current_page_deployments" '. + $new_items')"
+            offset=$((offset + current_page_count))
+        fi
+
+        if [[ "$current_page_count" -lt "$limit" ]]; then
+            break
+        fi
+    done
+
+    local final_json_deployments="$(echo "$all_deployments" | jq '{deployments: .}')"
 
     if [[ "$namespace_value" != "NA" ]]; then
-    	json_deployments_with_processes="$(echo "$json_deployments_with_processes" | jq --arg namespace "$namespace_value" '{deployments: [.deployments[] | select(.deployment.namespace == $namespace)]}')"
+        final_json_deployments="$(echo "$final_json_deployments" | jq --arg namespace "$namespace_value" '{deployments: [.deployments[] | select(.deployment.namespace == $namespace)]}')"
     fi
     if [[ "$deploymentname_value" != "NA" ]]; then
-    	json_deployments_with_processes="$(echo "$json_deployments_with_processes" | jq --arg name "$deploymentname_value" '{deployments: [.deployments[] | select(.deployment.name == $name)]}')"
+        final_json_deployments="$(echo "$final_json_deployments" | jq --arg name "$deploymentname_value" '{deployments: [.deployments[] | select(.deployment.name == $name)]}')"
     fi
     if [[ "$deployment_value" != "NA" ]]; then
-    	json_deployments_with_processes="$(echo "$json_deployments_with_processes" | jq --arg deployment "$deployment_value" '{deployments: [.deployments[] | select(.deployment.id == $deployment)]}')"
+        final_json_deployments="$(echo "$final_json_deployments" | jq --arg deployment "$deployment_value" '{deployments: [.deployments[] | select(.deployment.id == $deployment)]}')"
     fi
     if [[ "$clustername_value" != "NA" ]]; then
-        json_deployments_with_processes="$(echo "$json_deployments_with_processes" | jq --arg cluster "$clustername_value" '{deployments: [.deployments[] | select(.deployment.cluster == $cluster)]}')"
+        final_json_deployments="$(echo "$final_json_deployments" | jq --arg cluster "$clustername_value" '{deployments: [.deployments[] | select(.deployment.cluster == $cluster)]}')"
     fi
     if [[ "$clusterid_value" != "NA" ]]; then
-    	json_deployments_with_processes="$(echo "$json_deployments_with_processes" | jq --arg clusterid "$clusterid_value" '{deployments: [.deployments[] | select(.deployment.clusterid == $cluster_id)]}')"
+        final_json_deployments="$(echo "$final_json_deployments" | jq --arg clusterid "$clusterid_value" '{deployments: [.deployments[] | select(.deployment.clusterid == $clusterid)]}')"
     fi
     if [[ "$created_value" != "NA" ]]; then
-        json_deployments_with_processes="$(echo "$json_deployments_with_processes" | jq --arg created "$created_value" '{deployments: [.deployments[] | select(.deployment.created > $created)]}')"
+        final_json_deployments="$(echo "$final_json_deployments" | jq --arg created "$created_value" '{deployments: [.deployments[] | select(.deployment.created > $created)]}')"
     fi
 
-    echo "$json_deployments_with_processes" | jq
+    echo "$final_json_deployments" | jq
 }
 
 get_keys_from_deployments_with_process_info() {
@@ -122,11 +145,27 @@ fi
 
 json_deployments_with_processes="$(get_process_baselines)"
 keys="$(get_keys_from_deployments_with_process_info "$json_deployments_with_processes")"
-query="$(keys_to_lock_query "$keys")"
 
-tmpfile=$(mktemp)
-echo "$query" > "$tmpfile"
+lock_batch_size=1000
 
-process_baselines_json="$(curl --location --silent --request PUT "https://${ROX_ENDPOINT}/v1/processbaselines/lock" -k --header "Authorization: Bearer $ROX_API_TOKEN" --data @"$tmpfile")"
+total_keys=$(echo "$keys" | jq 'length')
 
-echo "$process_baselines_json" | jq
+num_batches=$(( (total_keys + lock_batch_size - 1) / lock_batch_size ))
+
+for ((i=0; i<num_batches; i++)); do
+    offset=$((i * lock_batch_size))
+
+    batch_keys="$(echo "$keys" | jq --argjson offset "$offset" --argjson limit "$lock_batch_size" '.[$offset:$offset+$limit]')"
+
+    query='{"keys": '"$batch_keys"', "locked": '"$lock_value"'}'
+
+    tmpfile=$(mktemp)
+    echo "$query" > "$tmpfile"
+
+    echo "Processing batch $((i+1)) of $num_batches with offset $offset"
+    process_baselines_json="$(curl --location --silent --request PUT "https://${ROX_ENDPOINT}/v1/processbaselines/lock" -k --header "Authorization: Bearer $ROX_API_TOKEN" --data @"$tmpfile")"
+
+    echo "$process_baselines_json" | jq
+
+    rm "$tmpfile"
+done
