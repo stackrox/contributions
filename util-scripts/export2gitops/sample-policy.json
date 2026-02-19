@@ -1,0 +1,52 @@
+{
+    "policies": [
+        {
+            "id": "98d3bbd9-7189-403a-bfe5-0af4033d4316",
+            "name": "Netcat in Image",
+            "description": "This policy checks for container images containing netcat ",
+            "rationale": "Netcat potentially allows attackers to move laterally, and access external services from a running pod",
+            "remediation": "Use the base image package manager to remove \"nmap-ncat\"",
+            "disabled": false,
+            "categories": [
+                "Package Management"
+            ],
+            "lifecycleStages": [
+                "BUILD",
+                "DEPLOY"
+            ],
+            "eventSource": "NOT_APPLICABLE",
+            "exclusions": [],
+            "scope": [],
+            "severity": "HIGH_SEVERITY",
+            "enforcementActions": [],
+            "notifiers": [],
+            "lastUpdated": "2025-01-30T20:45:47.172554064Z",
+            "SORTName": "",
+            "SORTLifecycleStage": "",
+            "SORTEnforcement": false,
+            "policyVersion": "1.1",
+            "policySections": [
+                {
+                    "sectionName": "Rule 1",
+                    "policyGroups": [
+                        {
+                            "fieldName": "Image Component",
+                            "booleanOperator": "OR",
+                            "negate": false,
+                            "values": [
+                                {
+                                    "value": "nmap-ncat="
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "mitreAttackVectors": [],
+            "criteriaLocked": false,
+            "mitreVectorsLocked": false,
+            "isDefault": false,
+            "source": "DECLARATIVE"
+        }
+    ]
+}
