@@ -1,0 +1,84 @@
+{
+    "policies": [
+        {
+            "id": "53e1d1fb-bc1e-4ef3-98c3-8df0dd5679b8",
+            "name": "UBI version compliance",
+            "description": "All  images on the cluster using the Red Hat Universal Base Image (UBI) must use at least versions  8.5 or 9.3",
+            "rationale": "Using an older UBI image potentially exposes the workload to additional vulnerabilities",
+            "remediation": "Update the base image to at least UBI 8.5 or 9.3",
+            "disabled": true,
+            "categories": [
+                "Package Management"
+            ],
+            "lifecycleStages": [
+                "BUILD",
+                "DEPLOY"
+            ],
+            "eventSource": "NOT_APPLICABLE",
+            "exclusions": [
+                {
+                    "name": "",
+                    "deployment": {
+                        "name": "",
+                        "scope": {
+                            "cluster": "",
+                            "namespace": "openshift-*",
+                            "label": null
+                        }
+                    },
+                    "image": null,
+                    "expiration": null
+                },
+                {
+                    "name": "",
+                    "deployment": {
+                        "name": "",
+                        "scope": {
+                            "cluster": "",
+                            "namespace": "stackrox",
+                            "label": null
+                        }
+                    },
+                    "image": null,
+                    "expiration": null
+                }
+            ],
+            "scope": [],
+            "severity": "MEDIUM_SEVERITY",
+            "enforcementActions": [],
+            "notifiers": [],
+            "SORTName": "",
+            "SORTLifecycleStage": "",
+            "SORTEnforcement": false,
+            "policyVersion": "1.1",
+            "policySections": [
+                {
+                    "sectionName": "Rule 1",
+                    "policyGroups": [
+                        {
+                            "fieldName": "Image Component",
+                            "booleanOperator": "OR",
+                            "negate": false,
+                            "values": [
+                                {
+                                    "value": "redhat-release=8\\.[0-4]-[0-9]+(?:\\.[0-9]+)?\\.el8"
+                                },
+                                {
+                                    "value": "redhat-release=9\\.[0-2]-[0-9]+(?:\\.[0-9]+)?\\.el9"
+                                },
+                                {
+                                    "value": "redhat-release-server=7.*"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "mitreAttackVectors": [],
+            "criteriaLocked": false,
+            "mitreVectorsLocked": false,
+            "isDefault": false,
+            "source": "IMPERATIVE"
+        }
+    ]
+}
