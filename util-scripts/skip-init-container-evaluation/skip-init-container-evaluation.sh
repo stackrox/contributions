@@ -66,6 +66,22 @@ for id in $policies; do
     continue
   fi
 
+  # Skip declarative (CRD-managed) policies — customers should update their CRD manifests directly
+  source=$(echo "$policy" | jq -r '.source')
+  if [[ "$source" == "DECLARATIVE" ]]; then
+    echo "  SKIP: \"$name\" — declarative policy (update CRD directly)"
+    skipped=$((skipped + 1))
+    continue
+  fi
+
+  # Skip audit log and node event policies — they don't evaluate containers
+  event_source=$(echo "$policy" | jq -r '.eventSource')
+  if [[ "$event_source" == "AUDIT_LOG_EVENT" || "$event_source" == "NODE_EVENT" ]]; then
+    echo "  SKIP: \"$name\" — $event_source policy (no container evaluation)"
+    skipped=$((skipped + 1))
+    continue
+  fi
+
   # Add skipContainerTypes: ["INIT"] to the evaluation filter
   updated_policy=$(echo "$policy" | jq '.evaluationFilter = {"skipContainerTypes": ["INIT"]}')
 
