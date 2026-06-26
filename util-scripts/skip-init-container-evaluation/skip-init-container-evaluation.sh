@@ -34,6 +34,7 @@ policies=$(curl -sk -H "$AUTH" "$API/v1/policies" | jq -r '.policies[].id')
 total=$(echo "$policies" | wc -l | tr -d ' ')
 updated=0
 skipped=0
+failed=0
 
 echo "Found $total policies"
 echo ""
@@ -51,8 +52,8 @@ for id in $policies; do
   name=$(echo "$policy" | jq -r '.name')
 
   # Skip if any evaluation filter is already configured
-  existing_filter=$(echo "$policy" | jq -e '.evaluationFilter // empty' 2>/dev/null)
-  if [[ -n "$existing_filter" && "$existing_filter" != "{}" ]]; then
+  existing_filter=$(echo "$policy" | jq '.evaluationFilter // empty' 2>/dev/null)
+  if [[ -n "$existing_filter" && "$existing_filter" != "{}" && "$existing_filter" != "null" ]]; then
     echo "  SKIP: \"$name\" — already has evaluation filter"
     skipped=$((skipped + 1))
     continue
@@ -93,8 +94,13 @@ for id in $policies; do
     updated=$((updated + 1))
   else
     echo >&2 "  ERROR: \"$name\" — HTTP $result"
+    failed=$((failed + 1))
   fi
 done
 
 echo ""
-echo "Done. Updated: $updated, Skipped: $skipped, Total: $total"
+echo "Done. Updated: $updated, Skipped: $skipped, Failed: $failed, Total: $total"
+
+if [[ "$failed" -gt 0 ]]; then
+  exit 1
+fi
