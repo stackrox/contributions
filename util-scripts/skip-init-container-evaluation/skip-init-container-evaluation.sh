@@ -5,6 +5,8 @@
 
 set -euo pipefail
 
+CONFIRM_EACH=true
+
 if [[ -z "${ROX_ENDPOINT:-}" ]]; then
   echo >&2 "ROX_ENDPOINT must be set"
   exit 1
@@ -38,14 +40,6 @@ failed=0
 
 echo "Found $total policies"
 echo ""
-echo "This will add skipContainerTypes: [\"INIT\"] to all policies without an existing evaluation filter."
-echo "This action is not easily reversible."
-read -rp "Continue? (yes/no): " confirm
-if [[ "$confirm" != "yes" ]]; then
-  echo "Aborted."
-  exit 0
-fi
-echo ""
 
 for id in $policies; do
   policy=$(curl -sk -H "$AUTH" "$API/v1/policies/$id")
@@ -77,10 +71,24 @@ for id in $policies; do
 
   # Skip audit log and node event policies — they don't evaluate containers
   event_source=$(echo "$policy" | jq -r '.eventSource')
-  if [[ "$event_source" == "AUDIT_LOG_EVENT" || "$event_source" == "NODE_EVENT" ]]; then
-    echo "  SKIP: \"$name\" — $event_source policy (no container evaluation)"
+  if [[ "$event_source" == "AUDIT_LOG_EVENT" ]]; then
+    echo "  SKIP: \"$name\" — audit log event policy"
     skipped=$((skipped + 1))
     continue
+  fi
+  if [[ "$event_source" == "NODE_EVENT" ]]; then
+    echo "  SKIP: \"$name\" — node event policy"
+    skipped=$((skipped + 1))
+    continue
+  fi
+
+  if [[ "$CONFIRM_EACH" == "true" ]]; then
+    read -rp "  Update \"$name\"? (yes/no/all): " answer
+    case "$answer" in
+      all) CONFIRM_EACH=false ;;
+      yes) ;;
+      *) echo "  SKIP: \"$name\" — skipped by user"; skipped=$((skipped + 1)); continue ;;
+    esac
   fi
 
   # Add skipContainerTypes: ["INIT"] to the evaluation filter
