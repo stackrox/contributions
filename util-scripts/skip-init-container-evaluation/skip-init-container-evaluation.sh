@@ -33,6 +33,10 @@ echo "ACS version: $version"
 
 # List all policies
 policies=$(curl -sk -H "$AUTH" "$API/v1/policies" | jq -r '.policies[].id')
+if [[ -z "$policies" ]]; then
+  echo "No policies found."
+  exit 0
+fi
 total=$(echo "$policies" | wc -l | tr -d ' ')
 updated=0
 skipped=0
