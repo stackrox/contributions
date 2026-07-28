@@ -1,5 +1,8 @@
-from pydantic_settings import BaseSettings
+"""Module to read the configuration from the environment variables and provide the settings to the application
+"""
+
 import os
+from pydantic_settings import BaseSettings
 from dotenv import load_dotenv  # pylint: disable=import-error
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -14,6 +17,11 @@ class Settings(BaseSettings):
     #File Path where we can look for the list of ACS API Endpoints to work with
     endpoint_list_json_path:str = os.environ.get('ENDPOINT_LIST_JSON_PATH') or 'endpoint_list.json'
     
+    api_retry_count:int = os.environ.get('API_RETRY_COUNT') or 3
+    api_read_retry_delay:int = os.environ.get('API_READ_RETRY_DELAY') or 10
+    endpoint_file_read_retry_count:int = os.environ.get('ENDPOINT_FILE_READ_RETRY_COUNT') or 3
+    endpoint_file_read_retry_delay:int = os.environ.get('ENDPOINT_FILE_READ_RETRY_DELAY') or 10
+
     #Health Check Retry Count
     health_check_retry_count:int = os.environ.get('HEALTH_CHECK_RETRY_COUNT') or 3
     
