@@ -1,5 +1,5 @@
 #!/bin/bash
-# Adds skipContainerTypes: ["INIT"] to all existing policies that don't already have it.
+# Adds skipContainerTypes: ["SKIP_INIT"] to all existing policies that don't already have it.
 # This is intended for customers upgrading to 5.0+ who want to preserve the pre-5.0 behavior
 # where init containers were not evaluated by policies.
 
@@ -95,8 +95,8 @@ for id in $policies; do
     esac
   fi
 
-  # Add skipContainerTypes: ["INIT"] to the evaluation filter
-  updated_policy=$(echo "$policy" | jq '.evaluationFilter = {"skipContainerTypes": ["INIT"]}')
+  # Add skipContainerTypes: ["SKIP_INIT"] to the evaluation filter
+  updated_policy=$(echo "$policy" | jq '.evaluationFilter = {"skipContainerTypes": ["SKIP_INIT"]}')
 
   result=$(curl -sk -o /dev/null -w "%{http_code}" -XPUT -H "$AUTH" -H "Content-Type: application/json" \
     "$API/v1/policies/$id" --data "$updated_policy")
